@@ -3,6 +3,8 @@ depends on uscpi-tcp, daemontools, and python2.6
 or higher.
 
 configure hub:
+    mkdir -p /path/for/hub/socket/dir
+    mkdir -p /path/for/remote/sockets/dir
     ./make.sh and yes for make hub.
 
 add peer:
