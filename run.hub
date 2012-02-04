@@ -1,0 +1,2 @@
+#!/bin/sh -e
+exec python hub.py `cat env/hub_socket` `cat env/remote_sockets`

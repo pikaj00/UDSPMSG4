@@ -1,0 +1,2 @@
+#!/bin/sh -e
+exec tcpserver -H -R -l `cat env/this_ip` 15783 python client.py `cat env/hub_socket` `cat env/remote_sockets`
