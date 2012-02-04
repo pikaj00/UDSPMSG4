@@ -15,8 +15,8 @@ except:
     os.remove(hubsock)
     hub.bind(hubsock)
 
-md5cache=collections.deque(maxlen=16384)
 md5cache=[]
+md5cache=collections.deque(maxlen=16384)
 switch={}
 
 while 1:
