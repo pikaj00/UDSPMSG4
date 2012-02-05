@@ -25,7 +25,7 @@ while 1:
 
     if not md5sum in md5cache:
         these_KVPs=udpmsg4.unframe(this_packet)
-        if these_KVPs!=0:
+        if these_KVPs!=0 and not '' these_KVPs:
             md5cache+=[md5sum]
 
             if 'SRCKEY' in these_KVPs:
