@@ -16,6 +16,7 @@ except:
     pass
 
 client.bind(clientsock)
+client.setblocking(0)
 client.connect(hubsocket)
 clientfd=client.fileno()
 

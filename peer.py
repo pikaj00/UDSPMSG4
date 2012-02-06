@@ -16,6 +16,7 @@ except:
     pass
 
 peer.bind(peersock)
+peer.setblocking(0)
 peer.connect(hubsocket)
 peerfd=peer.fileno()
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-import sys, os, collections
+import sys, os, select
 from hashlib import *
 from socket import *
+readable=select.select
 
 sys.dont_write_bytecode=True
 import udpmsg4
@@ -14,20 +15,23 @@ try:
 except:
     os.remove(hubsock)
     hub.bind(hubsock)
+hubfd=hub.fileno()
 
 md5cache=[]
-md5cache=collections.deque(maxlen=65536)
-switch={}
-
 while 1:
-    this_packet,this_client=hub.recvfrom(65536)
-    md5sum=md5(this_packet).digest()
+    read_this=readable([hubfd],[],[],1)[0]
+    if hubfd in read_this:
 
-    if not md5sum in md5cache:
-        md5cache+=[md5sum]
-        for this_socket in os.listdir(remotesockdir):
-            if this_socket!=this_client:
-                try:
-                    hub.sendto(this_packet,remotesockdir+'/'+this_socket)
-                except:
-                    pass
+        this_packet,this_client=hub.recvfrom(65536)
+        md5sum=md5(this_packet).digest()
+
+        if not md5sum in md5cache:
+            if len(md5cache)==65536:
+                md5cache=md5cache[1::]
+            md5cache+=[md5sum]
+            for this_socket in os.listdir(remotesockdir):
+                if this_socket!=this_client:
+                    try:
+                        hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                    except:
+                        os.remove(remotesockdir+'/'+this_socket)
