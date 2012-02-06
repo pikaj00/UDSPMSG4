@@ -8,17 +8,16 @@ hubsocket=(sys.argv[1])
 os.chdir(sys.argv[2])
 
 clientsock=str(os.getpid())
-clientsock=(clientsock)
 client=socket(AF_UNIX,SOCK_DGRAM)
+
 try:
-    client.bind(clientsock)
-    client.connect(hubsocket)
-    clientfd=client.fileno()
-except:
     os.remove(clientsock)
-    client.bind(clientsock)
-    client.connect(hubsocket)
-    clientfd=client.fileno()
+except:
+    pass
+
+client.bind(clientsock)
+client.connect(hubsocket)
+clientfd=client.fileno()
 
 while 1:
     read_this=readable([0,clientfd],[],[],1)[0]

@@ -8,17 +8,16 @@ hubsocket=(sys.argv[1])
 os.chdir(sys.argv[2])
 
 peersock=str(os.getpid())
-peersock=(peersock)
 peer=socket(AF_UNIX,SOCK_DGRAM)
+
 try:
-    peer.bind(peersock)
-    peer.connect(hubsocket)
-    peerfd=peer.fileno()
-except:
     os.remove(peersock)
-    peer.bind(peersock)
-    peer.connect(hubsocket)
-    peerfd=peer.fileno()
+except:
+    pass
+
+peer.bind(peersock)
+peer.connect(hubsocket)
+peerfd=peer.fileno()
 
 while 1:
     read_this=readable([6,peerfd],[],[],1)[0]

@@ -1,0 +1,6 @@
+#!/bin/sh
+for i in `ls -A` ; do
+    [[ "$i" != 'conf' ]] && git add "$i"
+done
+
+git commit
