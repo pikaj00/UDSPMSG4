@@ -28,7 +28,7 @@ while 1:
 
         if not sha512sum in sha512cache:
             if len(sha512cache)==65536:
-                sha512cache=md5cache[1::]
+                sha512cache=sha512cache[1::]
             sha512cache+=[sha512sum]
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
