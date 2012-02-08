@@ -18,22 +18,24 @@ except:
 hub.setblocking(0)
 hubfd=hub.fileno()
 
-md5cache=[]
+sha512cache=[]
 while 1:
     read_this=readable([hubfd],[],[],1)[0]
     if hubfd in read_this:
 
         this_packet,this_client=hub.recvfrom(65536)
-        md5sum=md5(this_packet).digest()
+        sha512sum=sha512(this_packet).digest()
 
-        if not md5sum in md5cache:
-            if len(md5cache)==65536:
-                md5cache=md5cache[1::]
-            md5cache+=[md5sum]
+        if not sha512sum in sha512cache:
+            if len(sha512cache)==65536:
+                sha512cache=sha512cache[1::]
+            sha512cache+=[sha512sum]
+            packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if this_socket!=this_client:
                     try:
-                        hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                        write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                        if write_length!=packet_length:
+                            os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
                     except:
-#                        os.remove(remotesockdir+'/'+this_socket)
-                         DUMMY=1
+                        os.write(2,'error: cannot write to '+remotesockdir+'/'+this_socket+'\n')
