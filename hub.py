@@ -30,9 +30,12 @@ while 1:
             if len(md5cache)==65536:
                 md5cache=md5cache[1::]
             md5cache+=[md5sum]
+            packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if this_socket!=this_client:
                     try:
-                        hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                        write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                        if write_length!=packet_length:
+                            print('error: write_length == '+str(write_length)+', packet_length == '+str(write_length))
                     except:
-                        os.remove(remotesockdir+'/'+this_socket)
+                        print('error: cannot write to '+remotesockdir+'/'+this_socket)

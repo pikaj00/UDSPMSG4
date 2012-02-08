@@ -26,12 +26,12 @@ while 1:
         if 0 in read_this:
             client_packet=os.read(0,65536)
             if not client_packet:
+                os.remove(clientsock)
                 break
             client.sendto(client_packet,hubsocket)
         if clientfd in read_this:
             hub_packet=client.recv(65536)
             if not hub_packet:
+                os.remove(clientsock)
                 break
             os.write(1,hub_packet)
-
-os.remove(clientsock)

@@ -25,12 +25,12 @@ while 1:
         if 6 in read_this:
             peer_packet=os.read(6,65536)
             if not peer_packet:
+                os.remove(peersock)
                 break
             peer.sendto(peer_packet,hubsocket)
         if peerfd in read_this:
             hub_packet=peer.recv(65536)
             if not hub_packet:
+                os.remove(peersock)
                 break
             os.write(7,hub_packet)
-
-os.remove(peersock)
