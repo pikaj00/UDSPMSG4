@@ -5,9 +5,9 @@ from socket import *
 readable=select.select
 
 hubsocket=(sys.argv[1])
-os.chdir(sys.argv[2])
+#os.chdir(sys.argv[2])
 
-peersock=str(os.getpid())
+peersock=sys.argv[2]+'/'+str(os.getpid())
 peer=socket(AF_UNIX,SOCK_DGRAM)
 
 try:
@@ -37,6 +37,8 @@ while 1:
             except:
                 os.write(2,'error: udpmsg4 protocol error\n')
                 proto_error=1
+                os.remove(peersock)
+                break
 
             if proto_error==0:
                 if not peer_packet:
