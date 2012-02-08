@@ -37,6 +37,7 @@ while 1:
                 os.write(2,'error: cannot write to '+hubsocket+'\n')
         if peerfd in read_this:
             hub_packet=peer.recv(65536)
+            hub_packet=chr(int(round(len(hub_packet)/256)))+chr(int(round(len(hub_packet)%256)))+hub_packet
             if not hub_packet:
                 os.remove(peersock)
                 break

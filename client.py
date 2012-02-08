@@ -24,7 +24,9 @@ while 1:
     read_this=readable([0,clientfd],[],[],1)[0]
     if read_this!=[]:
         if 0 in read_this:
-            client_packet=os.read(0,65536)
+            client_packet=os.read(0,2)
+            packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
+            client_packet=os.read(0,packet_length)
             if not client_packet:
                 os.remove(clientsock)
                 break
