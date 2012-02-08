@@ -4,12 +4,15 @@ read -p "[Y/N] make hub?: " qna
 if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
     echo "[Default] `cat env/this_ip`"
     read -p "[Enter] this ip: " this_ip
+    [[ "$this_ip" == '' ]] && this_ip=`cat env/this_ip`
 
     echo "[Default] `cat env/hub_socket`"
     read -p "[Enter] /path/to/hub/socket: " hub_socket
+    [[ "$hub_socket" == '' ]] && hub_socket=`cat env/hub_socket`
 
     echo "[Default] `cat env/remote_sockets`"
     read -p "[Enter] /remote/sockets/directory: " remote_sockets
+    [[ "$remote_sockets" == '' ]] && remote_sockets=`cat env/remote_sockets`
 
     echo "[Proposed configuration]
         this ip: $this_ip

@@ -15,6 +15,7 @@ try:
 except:
     os.remove(hubsock)
     hub.bind(hubsock)
+hub.setblocking(0)
 hubfd=hub.fileno()
 
 md5cache=[]
