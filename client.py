@@ -23,20 +23,25 @@ clientfd=client.fileno()
 while 1:
     read_this=readable([0,clientfd],[],[],1)[0]
     if read_this!=[]:
+
         if 0 in read_this:
-            client_packet=os.read(0,2)
-            packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
-            client_packet=os.read(0,packet_length)
-            if not client_packet:
-                os.remove(clientsock)
-                break
-            packet_length=len(client_packet)
             try:
-                write_length=client.sendto(client_packet,hubsocket)
-                if write_length!=packet_length:
-                    os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                client_packet=os.read(0,2)
+                packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
+                client_packet=os.read(0,packet_length)
+                if not client_packet:
+                    os.remove(clientsock)
+                    break
+                packet_length=len(client_packet)
+                try:
+                    write_length=client.sendto(client_packet,hubsocket)
+                    if write_length!=packet_length:
+                        os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                except:
+                    os.write(2,'error: cannot write to '+hubsocket+'\n')
             except:
-                os.write(2,'error: cannot write to '+hubsocket+'\n')
+                os.write(2,'error: udpmsg4 protocol error\n')
+
         if clientfd in read_this:
             hub_packet=client.recv(65536)
             if not hub_packet:
