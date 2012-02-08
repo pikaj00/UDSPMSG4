@@ -28,8 +28,9 @@ while 1:
             try:
                 client_packet=os.read(0,2)
                 packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
-                while client_packet!=packet_length:
-                    client_packet+=os.read(0,packet_length-client_packet)
+                client_packet=''
+                while len(client_packet)!=packet_length:
+                    client_packet+=os.read(0,packet_length-len(client_packet))
                     if not client_packet:
                         os.remove(clientsock)
                         break

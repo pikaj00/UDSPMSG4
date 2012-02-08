@@ -27,8 +27,9 @@ while 1:
             try:
                 peer_packet=os.read(6,2)
                 packet_length=(ord(peer_packet[:1:])*256)+ord(peer_packet[1:2:])
-                while peer_packet!=packet_length:
-                    peer_packet+=os.read(6,packet_length-peer_packet)
+                peer_packet=''
+                while len(peer_packet)!=packet_length:
+                    peer_packet+=os.read(6,packet_length-len(peer_packet))
                     if not peer_packet:
                         os.remove(peersock)
                         break
