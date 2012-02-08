@@ -27,11 +27,11 @@ while 1:
             try:
                 peer_packet=os.read(6,2)
                 packet_length=(ord(peer_packet[:1:])*256)+ord(peer_packet[1:2:])
-                    while peer_packet!=packet_length:
-                        peer_packet+=os.read(6,packet_length-peer_packet)
-                        if not peer_packet:
-                            os.remove(peersock)
-                            break
+                while peer_packet!=packet_length:
+                    peer_packet+=os.read(6,packet_length-peer_packet)
+                    if not peer_packet:
+                        os.remove(peersock)
+                        break
             except:
                 os.write(2,'error: udpmsg4 protocol error\n')
                 proto_error=1
