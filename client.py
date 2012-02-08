@@ -37,6 +37,8 @@ while 1:
             except:
                 os.write(2,'error: udpmsg4 protocol error\n')
                 proto_error=1
+                os.remove(clientsock)
+                break
 
             if proto_error==0:
                 if not client_packet:
