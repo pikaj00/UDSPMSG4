@@ -35,4 +35,5 @@ while 1:
                     try:
                         hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                     except:
-                        os.remove(remotesockdir+'/'+this_socket)
+#                        os.remove(remotesockdir+'/'+this_socket)
+                         DUMMY=1

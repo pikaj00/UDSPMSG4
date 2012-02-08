@@ -5,9 +5,9 @@ from socket import *
 readable=select.select
 
 hubsocket=(sys.argv[1])
-os.chdir(sys.argv[2])
+#os.chdir(sys.argv[2])
 
-clientsock=str(os.getpid())
+clientsock=sys.argv[2]+'/'+str(os.getpid())
 client=socket(AF_UNIX,SOCK_DGRAM)
 
 try:

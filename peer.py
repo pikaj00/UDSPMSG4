@@ -5,9 +5,9 @@ from socket import *
 readable=select.select
 
 hubsocket=(sys.argv[1])
-os.chdir(sys.argv[2])
+#os.chdir(sys.argv[2])
 
-peersock=str(os.getpid())
+peersock=sys.argv[2]+'/'+str(os.getpid())
 peer=socket(AF_UNIX,SOCK_DGRAM)
 
 try:
