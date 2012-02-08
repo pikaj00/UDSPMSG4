@@ -5,8 +5,6 @@ from socket import *
 readable=select.select
 
 hubsocket=(sys.argv[1])
-#os.chdir(sys.argv[2])
-
 peersock=sys.argv[2]+'/'+str(os.getpid())
 peer=socket(AF_UNIX,SOCK_DGRAM)
 
@@ -16,12 +14,10 @@ except:
     pass
 
 peer.bind(peersock)
-peer.setblocking(0)
 peer.connect(hubsocket)
 peerfd=peer.fileno()
 
 while 1:
-    proto_error=0
     read_this=readable([6,peerfd],[],[],1)[0]
     if read_this!=[]:
         if 6 in read_this:
@@ -40,17 +36,16 @@ while 1:
                 os.remove(peersock)
                 break
 
-            if proto_error==0:
-                if not peer_packet:
-                    os.remove(peersock)
-                    break
-                try:
-                    write_length=0
-                    packet_length=len(peer_packet)
-                    while write_length!=packet_length:
-                        write_length=peer.sendto(peer_packet,hubsocket[write_length::])
-                except:
-                    os.write(2,'error: cannot write to '+hubsocket+'\n')
+            if not peer_packet:
+                os.remove(peersock)
+                break
+            try:
+                write_length=0
+                packet_length=len(peer_packet)
+                while write_length!=packet_length:
+                    write_length=peer.sendto(peer_packet,hubsocket[write_length::])
+            except:
+                os.write(2,'error: cannot write to '+hubsocket+'\n')
 
         if peerfd in read_this:
             hub_packet=peer.recv(65536)
