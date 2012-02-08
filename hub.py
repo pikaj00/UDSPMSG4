@@ -36,6 +36,6 @@ while 1:
                     try:
                         write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                         if write_length!=packet_length:
-                            print('error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
+                            os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
                     except:
-                        print('error: cannot write to '+remotesockdir+'/'+this_socket)
+                        os.write(2,'error: cannot write to '+remotesockdir+'/'+this_socket)

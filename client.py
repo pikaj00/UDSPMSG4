@@ -32,9 +32,9 @@ while 1:
             try:
                 write_length=client.sendto(client_packet,hubsocket)
                 if write_length!=packet_length:
-                    print('error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
+                    os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
             except:
-                print('error: cannot write to '+hubsocket)
+                os.write(2,'error: cannot write to '+hubsocket)
         if clientfd in read_this:
             hub_packet=client.recv(65536)
             if not hub_packet:
@@ -44,6 +44,6 @@ while 1:
             try:
                 write_length=os.write(1,hub_packet)
                 if write_length!=packet_length:
-                    print('error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
+                    os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length))
             except:
-                print('error: cannot write to '+clientsock)
+                os.write(2,'error: cannot write to '+clientsock)
