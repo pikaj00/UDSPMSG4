@@ -18,7 +18,7 @@ except:
 hub.setblocking(0)
 hubfd=hub.fileno()
 
-md5cache=[]
+sha512cache=[]
 while 1:
     read_this=readable([hubfd],[],[],1)[0]
     if hubfd in read_this:
