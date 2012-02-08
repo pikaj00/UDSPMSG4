@@ -28,8 +28,6 @@ while 1:
             try:
                 client_packet=os.read(0,2)
                 packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
-                client_packet=os.read(0,packet_length)
-                if client_packet!=packet_length:
                     while client_packet!=packet_length:
                         client_packet+=os.read(0,packet_length-client_packet)
                         if not client_packet:
@@ -53,6 +51,7 @@ while 1:
 
         if clientfd in read_this:
             hub_packet=client.recv(65536)
+            hub_packet=chr(int(round(len(hub_packet)/256)))+chr(int(round(len(hub_packet)%256)))+hub_packet
             if not hub_packet:
                 os.remove(clientsock)
                 break
