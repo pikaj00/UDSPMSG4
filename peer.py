@@ -41,11 +41,11 @@ while 1:
                 if not peer_packet:
                     os.remove(peersock)
                     break
-                packet_length=len(peer_packet)
                 try:
-                    write_length=peer.sendto(peer_packet,hubsocket)
-                    if write_length!=packet_length:
-                        os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                    write_length=0
+                    packet_length=len(peer_packet)
+                    while write_length!=packet_length:
+                        write_length=peer.sendto(peer_packet,hubsocket[write_length::])
                 except:
                     os.write(2,'error: cannot write to '+hubsocket+'\n')
 
@@ -55,10 +55,10 @@ while 1:
             if not hub_packet:
                 os.remove(peersock)
                 break
-            packet_length=len(hub_packet)
             try:
-                write_length=os.write(7,hub_packet)
-                if write_length!=packet_length:
-                    os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                write_length=0
+                packet_length=len(hub_packet)
+                while write_length!=packet_length:
+                    write_length=os.write(7,hub_packet[write_length::])
             except:
                 os.write(2,'error: cannot write to '+peersock+'\n')
