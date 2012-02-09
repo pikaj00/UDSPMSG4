@@ -58,7 +58,6 @@ while 1:
                 os.write(2,'stream.py '+pid+' error: cannot write to '+pathclient+' '+str(ex.errno)+'\n')
                 os.remove(pathclient)
                 break
-    os.write(2,'stream.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
 
         if 0 in read_this:
             try:
@@ -91,3 +90,4 @@ while 1:
                     packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
                 else:
                     packet_length=0
+    os.write(2,'stream.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
