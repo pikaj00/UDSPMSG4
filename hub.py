@@ -21,8 +21,16 @@ hub.setblocking(0)
 hubfd=hub.fileno()
 
 eagain=[]
+success=[]
 sha512cache=[]
 while 1:
+    message=''
+    message+='hub.py SUCCESS ['
+    for this_socket in success:
+        message+=this_socket+','
+    message+=']\n'
+    os.write(2,message+'\n')
+    success=[]
     message=''
     message+='hub.py EAGAIN ['
     for this_socket in eagain:
@@ -49,7 +57,7 @@ while 1:
                         write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                         if write_length!=packet_length:
                             os.write(2,'hub.py error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
-                        os.write(2,'hub.py success: can write to '+remotesockdir+'/'+this_socket+'\n')
+                        success+=[this_socket]
                     except socket.error, ex:
                         if ex.errno == 111:
                             os.write(2,'hub.py socket dead '+remotesockdir+'/'+this_socket+'\n')
