@@ -21,6 +21,7 @@ client.bind(pathclient)
 clientfd=client.fileno()
 
 toremote=''
+fromremote=''
 while 1:
     os.write(2,'stream.py '+pid+' toremote length == '+str(len(toremote))+'\n')
 #    sockets=readable([6,peerfd],[7,clientfd],[],1)
@@ -32,27 +33,26 @@ while 1:
     if read_this!=[]:
         if 0 in read_this:
             try:
-                client_packet=os.read(0,2)
-                packet_length=(ord(client_packet[:1:])*256)+ord(client_packet[1:2:])
-                client_packet=''
-                while len(client_packet)!=packet_length:
-                    client_packet+=os.read(0,packet_length-len(client_packet))
-                    if not client_packet:
-                        os.remove(pathclient)
-                        break
+                client_packet=os.read(0,4096)
+                if not client_packet:
+                    os.remove(pathclient)
+                    break
+                fromremote+=client_packet
             except:
                 os.write(2,'error: udpmsg4 protocol error\n')
                 os.remove(pathclient)
                 break
-
-            if not client_packet:
-                os.remove(pathclient)
-                break
-            try:
-                packet_length=len(client_packet)
-                write_length=client.sendto(client_packet,pathhub)
-            except socket.error, ex:
-                os.write(2,'client.py '+pid+' error: cannot write to '+pathhub+' '+str(ex.errno)+'\n')
+            packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
+            while len(fromremote)>=2+packet_length:
+                fromremote=fromremote[2::]
+                client_packet=fromremote[:packet_length:]
+                fromremote=fromremote[packet_length::]
+                try:
+                    packet_length=len(client_packet)
+                    write_length=client.sendto(client_packet,pathhub)
+                except socket.error, ex:
+                    os.write(2,'client.py '+pid+' error: cannot write to '+pathhub+' '+str(ex.errno)+'\n')
+                packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
 
         if clientfd in read_this:
             hub_packet=client.recv(65536)
