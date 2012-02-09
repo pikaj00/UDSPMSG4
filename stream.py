@@ -77,6 +77,7 @@ while 1:
                             write_length=os.write(1,toremote)
                         except socket.error, ex:
                             if ex.errno == 104:
+                                os.write(2,'stream.py '+pid+' connection closed from remote\n')
                                 os.remove(pathclient)
                                 break
                         if write_length>0:
