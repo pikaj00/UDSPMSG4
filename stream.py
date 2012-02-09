@@ -42,7 +42,10 @@ while 1:
                 os.write(2,'error: udpmsg4 protocol error\n')
                 os.remove(pathclient)
                 break
-            packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
+            if len(fromremote)>=2:
+                packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
+            else:
+                packet_length=0
             while len(fromremote)>=2+packet_length:
                 fromremote=fromremote[2::]
                 client_packet=fromremote[:packet_length:]
@@ -52,7 +55,10 @@ while 1:
                     write_length=client.sendto(client_packet,pathhub)
                 except socket.error, ex:
                     os.write(2,'client.py '+pid+' error: cannot write to '+pathhub+' '+str(ex.errno)+'\n')
-                packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
+                if len(fromremote)>=2:
+                    packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
+                else:
+                    packet_length=0
 
         if clientfd in read_this:
             hub_packet=client.recv(65536)
