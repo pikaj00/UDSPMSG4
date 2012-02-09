@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, os, select
+import sys, os, select, collections
 from hashlib import *
 #from socket import *
 import socket
