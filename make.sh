@@ -1,5 +1,10 @@
 #!/bin/sh
 this_dir=`pwd`
+mkdir -p conf
+touch env/this_ip
+touch env/hub_socket
+touch env/remote_sockets
+touch env/client2server
 read -p "[Y/N] make hub?: " qna
 if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
     echo "[Default] `cat env/this_ip`"
@@ -34,7 +39,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
 
         mkdir -p /service/udpmsg4.client
         cp run.client /service/udpmsg4.client/run
-        cp client.py /service/udpmsg4.client/client.py
+        cp stream.py /service/udpmsg4.client/stream.py
         chmod +x /service/udpmsg4.client/run
         [ -e /service/udpmsg4.client/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.client )
     fi
@@ -42,12 +47,24 @@ fi
 
 read -p "[Y/N] make peers?: " qna
 if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
-    for this_peer in `ls peers` ; do
-        mkdir -p /service/udpmsg4.$this_peer
-        cp run.peer /service/udpmsg4.$this_peer/run
-        cp peer.py /service/udpmsg4.$this_peer/peer.py
-        chmod +x /service/udpmsg4.$this_peer/run
-        [ -e /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
-        [ -e /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
-    done
+    echo "[Default] `cat env/client2server`"
+    read -p "[Enter] /path/to/ucspi-client2server: " client2server
+    [[ "$client2server" == '' ]] && remote_sockets=`cat env/client2server`
+
+    echo "[Proposed configuration]
+        /path/to/ucspi-client2server: $client2server"
+
+    read -p "[Y/N] use this configuration?: " qna
+    if [[ "$qna" != *Y* ]] || [[ "$qna" == *y* ]]; then
+
+        for this_peer in `ls peers` ; do
+            mkdir -p /service/udpmsg4.$this_peer
+            cp run.peer /service/udpmsg4.$this_peer/run
+            cp stream.py /service/udpmsg4.$this_peer/stream.py
+            chmod +x /service/udpmsg4.$this_peer/run
+            [ -e /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
+            [ -e /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
+            [ -e /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
+        done
+    fi
 fi

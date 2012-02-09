@@ -1,15 +1,19 @@
 use make.sh to configure/install hub and peerings.
-depends on uscpi-tcp, daemontools, and python2.6
-or higher.
+depends on uscpi-tcp, daemontools, python2.6, and
+ucspi-client2server ( from cloudircd ).
 
 configure hub:
     mkdir -p /path/for/hub/socket/dir
     mkdir -p /path/for/remote/sockets/dir
-    ./make.sh and yes for make hub.
+    # ./make.sh and yes for make hub.
+    # follow in configuration prompts.
 
 add peer:
+    cd /path/to/cloudircd/cloudircd
+    gcc ucspi-client2server.c -o ucspi-client2server
     echo -n "$peer_ip">peers/$peer_name
-    do ./make.sh and yes for make peers.
+    # ./make.sh and yes for make peers.
+    # follow in configuration prompts.
 
 rm peer:
     svc -d /service/udpmsg4.$peer_name
