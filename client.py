@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 import sys, os, select
 from hashlib import *
-from socket import *
+#from socket import *
+import socket
 readable=select.select
 
 hubsocket=(sys.argv[1])
 #os.chdir(sys.argv[2])
 
-clientsock=sys.argv[2]+'/'+str(os.getpid())
-client=socket(AF_UNIX,SOCK_DGRAM)
+pid=str(os.getpid())
+os.write(2,'client.py '+pid+' starting\n')
+clientsock=sys.argv[2]+'/'+pid
+client=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 
 try:
     os.remove(clientsock)
@@ -16,12 +19,17 @@ except:
     pass
 
 client.bind(clientsock)
-client.connect(hubsocket)
+#client.connect(hubsocket)
 clientfd=client.fileno()
 
+toremote=''
 while 1:
+    os.write(2,'client.py '+pid+' toremote length == '+str(len(toremote))+'\n')
     proto_error=0
+#    read_this=readable([0,clientfd],[],[],1)[0]
     read_this=readable([0,clientfd],[],[],1)[0]
+    write_this=readable([],[1,clientfd],[],1)[1]
+    os.write(2,'client.py '+pid+' reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
     if read_this!=[]:
 
         if 0 in read_this:
@@ -47,10 +55,11 @@ while 1:
                 try:
                     write_length=0
                     packet_length=len(client_packet)
-                    while write_length!=packet_length:
-                        write_length=client.sendto(client_packet[write_length::],hubsocket)
-                except:
-                    os.write(2,'error: cannot write to '+hubsocket+'\n')
+                    if clientfd in write_this:
+                        while write_length!=packet_length:
+                            write_length=client.sendto(client_packet[write_length::],hubsocket)
+                except socket.error, ex:
+                    os.write(2,'client.py '+pid+' error: cannot write to '+hubsocket+' '+str(ex.errno)+'\n')
 
         if clientfd in read_this:
             hub_packet=client.recv(65536)
@@ -59,9 +68,16 @@ while 1:
                 os.remove(clientsock)
                 break
             try:
+                toremote+=hub_packet
                 write_length=0
-                packet_length=len(hub_packet)
+                packet_length=len(toremote)
                 while write_length!=packet_length:
-                    write_length=os.write(1,hub_packet[write_length::])
-            except:
-                os.write(2,'error: cannot write to '+clientsock+'\n')
+                    if 1 in write_this:
+                        write_length=os.write(1,toremote)
+                        if write_length>0:
+                            toremote=toremote[write_length::]
+                            packet_length=len(toremote)
+            except socket.error, ex:
+                os.write(2,'client.py '+pid+' error: cannot write to '+clientsock+' '+str(ex.errno)+'\n')
+                os.remove(clientsock)
+                break
