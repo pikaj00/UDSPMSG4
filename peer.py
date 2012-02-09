@@ -32,7 +32,6 @@ while 1:
                         break
             except:
                 os.write(2,'error: udpmsg4 protocol error\n')
-                proto_error=1
                 os.remove(peersock)
                 break
 
