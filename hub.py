@@ -34,6 +34,7 @@ while 1:
     if hubfd in read_this:
 
         this_packet,this_client=hub.recvfrom(65536)
+        os.write(2,'hub.py received from '+this_client+'\n')
         sha512sum=sha512(this_packet).digest()
 
         if not sha512sum in sha512cache:
@@ -57,3 +58,5 @@ while 1:
                             os.write(2,'error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
                         if ex.errno == 11:
                             eagain+=[this_socket]
+                else:
+                    os.write(2,'hub.py received from '+this_socket+'\n')
