@@ -6,8 +6,6 @@ import socket
 readable=select.select
 
 hubsocket=(sys.argv[1])
-#os.chdir(sys.argv[2])
-
 pid=str(os.getpid())
 peersock=sys.argv[2]+'/'+pid
 peer=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
@@ -24,7 +22,6 @@ peerfd=peer.fileno()
 toremote=''
 while 1:
     os.write(2,'peer.py '+pid+' toremote length == '+str(len(toremote))+'\n')
-    proto_error=0
 #    sockets=readable([6,peerfd],[7,peerfd],[],1)
 #    read_this=sockets[0]
 #    write_this=sockets[1]
@@ -47,19 +44,17 @@ while 1:
                 os.remove(peersock)
                 break
 
-            if proto_error==0:
-                if not peer_packet:
-                    os.remove(peersock)
-                    break
-                try:
-                    write_length=0
-                    packet_length=len(peer_packet)
-                    write_this=readable([],[7,peerfd],[])[1]
-                    if peerfd in write_this:
-                        while write_length!=packet_length:
-                            write_length=peer.sendto(peer_packet[write_length::],hubsocket)
-                except socket.error, ex:
-                    os.write(2,'peer.py '+pid+' error: cannot write to '+hubsocket+' '+str(ex.errno)+'\n')
+            if not peer_packet:
+                os.remove(peersock)
+                break
+            try:
+                write_length=0
+                packet_length=len(peer_packet)
+#                write_this=readable([],[7,peerfd],[])[1]
+#                if peerfd in write_this:
+                write_length=peer.sendto(peer_packet[write_length::],hubsocket)
+            except socket.error, ex:
+                os.write(2,'peer.py '+pid+' error: cannot write to '+hubsocket+' '+str(ex.errno)+'\n')
 
         if peerfd in read_this:
             hub_packet=peer.recv(65536)
