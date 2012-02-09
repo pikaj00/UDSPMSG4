@@ -37,7 +37,7 @@ while 1:
     message+=']'
     eagain=[]
     message+=' QUEUE ['
-    for key in keys(queue):
+    for key in queue.keys():
         message+=os.path.basename(key)+'='+str(len(queue[key]))
         if not key in clientsocketpaths:
             del queue[key]
@@ -45,7 +45,7 @@ while 1:
         message+=','
     message+=']\n'
     os.write(2,message+'\n')
-    for key in keys(queue):
+    for key in queue.keys():
         if len(queue[key])>0:
             try:
                 write_length=hub.sendto(queue[key][0],key)
