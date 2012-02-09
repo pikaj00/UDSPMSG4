@@ -31,6 +31,35 @@ while 1:
     write_this=readable([],[1,clientfd],[],1)[1]
     os.write(2,'stream.py '+pid+' start loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
     if read_this!=[]:
+        if clientfd in read_this:
+            hub_packet=client.recv(65536)
+            hub_packet=chr(int(round(len(hub_packet)/256)))+chr(int(round(len(hub_packet)%256)))+hub_packet
+            if not hub_packet:
+                os.remove(pathclient)
+                break
+            try:
+                toremote+=hub_packet
+                write_length=0
+                packet_length=len(toremote)
+                while write_length!=packet_length:
+                    write_this=readable([],[1],[])[1]
+                    if 1 in write_this:
+                        try:
+                            write_length=os.write(1,toremote)
+                        except os.error, ex:
+                            if ex.errno == 104:
+                                os.write(2,'stream.py '+pid+' connection closed from remote\n')
+                                os.remove(pathclient)
+                                break
+                        if write_length>0:
+                            toremote=toremote[write_length::]
+                            packet_length=len(toremote)
+            except socket.error, ex:
+                os.write(2,'stream.py '+pid+' error: cannot write to '+pathclient+' '+str(ex.errno)+'\n')
+                os.remove(pathclient)
+                break
+    os.write(2,'stream.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
+
         if 0 in read_this:
             try:
                 client_packet=os.read(0,4096)
@@ -62,32 +91,3 @@ while 1:
                     packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
                 else:
                     packet_length=0
-
-        if clientfd in read_this:
-            hub_packet=client.recv(65536)
-            hub_packet=chr(int(round(len(hub_packet)/256)))+chr(int(round(len(hub_packet)%256)))+hub_packet
-            if not hub_packet:
-                os.remove(pathclient)
-                break
-            try:
-                toremote+=hub_packet
-                write_length=0
-                packet_length=len(toremote)
-                while write_length!=packet_length:
-                    write_this=readable([],[1],[])[1]
-                    if 1 in write_this:
-                        try:
-                            write_length=os.write(1,toremote)
-                        except os.error, ex:
-                            if ex.errno == 104:
-                                os.write(2,'stream.py '+pid+' connection closed from remote\n')
-                                os.remove(pathclient)
-                                break
-                        if write_length>0:
-                            toremote=toremote[write_length::]
-                            packet_length=len(toremote)
-            except socket.error, ex:
-                os.write(2,'stream.py '+pid+' error: cannot write to '+pathclient+' '+str(ex.errno)+'\n')
-                os.remove(pathclient)
-                break
-    os.write(2,'stream.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
