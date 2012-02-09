@@ -48,14 +48,14 @@ while 1:
                     try:
                         write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                         if write_length!=packet_length:
-                            os.write(2,'error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
-                        os.write(2,'success: can write to '+remotesockdir+'/'+this_socket+'\n')
+                            os.write(2,'hub.py error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                        os.write(2,'hub.py success: can write to '+remotesockdir+'/'+this_socket+'\n')
                     except socket.error, ex:
                         if ex.errno == 111:
-                            os.write(2,'socket dead '+remotesockdir+'/'+this_socket+'\n')
+                            os.write(2,'hub.py socket dead '+remotesockdir+'/'+this_socket+'\n')
                             os.remove(remotesockdir+'/'+this_socket)
                         if ex.errno != 11:
-                            os.write(2,'error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
+                            os.write(2,'hub.py error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
                         if ex.errno == 11:
                             eagain+=[this_socket]
                 else:
