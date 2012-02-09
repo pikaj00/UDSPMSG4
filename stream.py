@@ -39,8 +39,11 @@ while 1:
                     break
                 fromremote+=client_packet
             except:
-                os.write(2,'error: udpmsg4 protocol error\n')
-                os.remove(pathclient)
+                os.write(2,'stream.py '+pid+' error: udpmsg4 protocol error\n')
+                try:
+                    os.remove(pathclient)
+                except:
+                    break
                 break
             if len(fromremote)>=2:
                 packet_length=(ord(fromremote[:1:])*256)+ord(fromremote[1:2:])
