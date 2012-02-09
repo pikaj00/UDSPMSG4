@@ -28,11 +28,9 @@ while 1:
     message+='hub.py SUCCESS ['
     for this_socket in success:
         message+=this_socket+','
-    message+=']\n'
-    os.write(2,message+'\n')
+    message+=']'
     success=[]
-    message=''
-    message+='hub.py EAGAIN ['
+    message+=' EAGAIN ['
     for this_socket in eagain:
         message+=this_socket+','
     message+=']\n'
