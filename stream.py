@@ -86,4 +86,4 @@ while 1:
                 os.write(2,'stream.py '+pid+' error: cannot write to '+pathclient+' '+str(ex.errno)+'\n')
                 os.remove(pathclient)
                 break
-    os.write(2,'peer.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
+    os.write(2,'stream.py '+pid+' end loop reads '+str(len(read_this))+' writes '+str(len(write_this))+'\n')
