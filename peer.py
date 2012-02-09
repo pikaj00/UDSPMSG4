@@ -66,6 +66,7 @@ while 1:
                 write_length=0
                 packet_length=len(toremote)
                 while write_length!=packet_length:
+                    write_this=readable([],[7],[])[1]
                     if 7 in write_this:
                         try:
                             write_length=os.write(7,toremote)
