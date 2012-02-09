@@ -1,2 +1,2 @@
 #!/bin/sh -e
-exec tcpclient -H -R -l `cat peer` `cat peer` 15783 python peer.py `cat env/hub_socket` `cat env/remote_sockets`
+exec tcpclient -H -R -l `cat peer` `cat peer` 15783 ucspi-client2server python stream.py `cat env/hub_socket` `cat env/remote_sockets`
