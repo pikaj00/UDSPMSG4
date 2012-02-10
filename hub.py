@@ -24,7 +24,9 @@ hubfd=hub.fileno()
 success=[]
 eagain=[]
 queue=dict()
-sha512cache=[]
+#sha512cache=[]
+cache=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+cache.connect(('127.15.78.3',15256))
 while 1:
     message=''
     message+='hub.py '+pid+' SUCCESS ['
@@ -87,12 +89,16 @@ while 1:
 
         this_packet,this_client=hub.recvfrom(65536)
         os.write(2,'hub.py '+pid+' received from '+this_client+'\n')
-        sha512sum=sha512(this_packet).digest()
+        #sha512sum=sha512(this_packet).digest()
 
-        if not sha512sum in sha512cache:
-            if len(sha512cache)==65536:
-                sha512cache=sha512cache[1::]
-            sha512cache+=[sha512sum]
+        #if not sha512sum in sha512cache:
+        #    if len(sha512cache)==65536:
+        #        sha512cache=sha512cache[1::]
+        #    sha512cache+=[sha512sum]
+
+        cache.send(this_packet)
+        database=cache.recv(1024)
+        if not chr(1) in database:
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if remotesockdir+'/'+this_socket!=this_client:

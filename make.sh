@@ -44,6 +44,16 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
         chmod +x /service/udpmsg4.hub/run
         [ -e /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
 
+        mkdir -p /service/udpmsg4.cache
+        cp run.cache /service/udpmsg4.cache/run
+        (
+            cd $naive
+            make
+            mv naive /service/udpmsg4.cache/naive
+            rm naive.o
+        )
+        chmod +x /service/udpmsg4.hub/run
+
         mkdir -p /service/udpmsg4.client
         cp run.client /service/udpmsg4.client/run
         cp stream.py /service/udpmsg4.client/stream.py
