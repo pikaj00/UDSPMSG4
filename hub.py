@@ -84,7 +84,7 @@ while 1:
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if remotesockdir+'/'+this_socket!=this_client:
-                    if len(queue[this_client])==0:
+                    if len(queue[this_socket])==0:
                         try:
                             write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                             if write_length!=packet_length:
@@ -98,8 +98,8 @@ while 1:
                                 os.write(2,'hub.py error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
                             if ex.errno == 11:
                                 eagain+=[this_socket]
-                                queue[this_client].append(this_packet)
+                                queue[this_socket].append(this_packet)
                     else:
-                        queue[this_client].append(this_packet)
+                        queue[this_socket].append(this_packet)
                 else:
                     os.write(2,'hub.py received from '+this_socket+'\n')
