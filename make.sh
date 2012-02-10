@@ -5,6 +5,7 @@ touch env/this_ip
 touch env/hub_socket
 touch env/remote_sockets
 touch env/client2server
+touch env/naive
 read -p "[Y/N] make hub?: " qna
 if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
     echo "[Default] `cat env/this_ip`"
@@ -19,16 +20,22 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
     read -p "[Enter] /remote/sockets/directory: " remote_sockets
     [[ "$remote_sockets" == '' ]] && remote_sockets=`cat env/remote_sockets`
 
+    echo "[Default] `cat env/naive`"
+    read -p "[Enter] /path/to/hubtools/hashcache: " naive
+    [[ "$naive" == '' ]] && naive=`cat env/naive`
+
     echo "[Proposed configuration]
         this ip: $this_ip
         /path/to/hub/socket: $hub_socket
-        /remote/sockets/directory: $remote_sockets"
+        /remote/sockets/directory: $remote_sockets
+        /path/to/hubtools/hashcache: $naive"
 
     read -p "[Y/N] use this configuration?: " qna
     if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
         echo -n $this_ip>env/this_ip
         echo -n $hub_socket>env/hub_socket
         echo -n $remote_sockets>env/remote_sockets
+        echo -n $naive>env/naive
 
         mkdir -p /service/udpmsg4.hub
         cp run.hub /service/udpmsg4.hub/run
