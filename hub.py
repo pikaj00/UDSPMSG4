@@ -98,14 +98,21 @@ while 1:
         #    if len(sha512cache)==65536:
         #        sha512cache=sha512cache[1::]
         #    sha512cache+=[sha512sum]
+        cachedb=''
+        while cachedb!='':
+            try:
+                cache.send(this_packet)
+                cachedb=0
+            except socket.error, ex:
+                if ex.errno == 11: pass
 
-        cache.send(this_packet)
         cachedb=''
         while cachedb!='':
             try:
                 cachedb=ord(cache.recv(1))
             except:
-                cachedb=''
+                pass
+
         if cachedb!=1:
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
