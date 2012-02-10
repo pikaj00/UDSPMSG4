@@ -52,7 +52,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
             mv naive /service/udpmsg4.cache/naive
             rm naive.o
         )
-        chmod +x /service/udpmsg4.hub/run
+        chmod +x /service/udpmsg4.cache/run
 
         mkdir -p /service/udpmsg4.client
         cp run.client /service/udpmsg4.client/run

@@ -4,6 +4,7 @@ from hashlib import *
 #from socket import *
 import socket
 readable=select.select
+cacheq=select.select
 
 sys.dont_write_bytecode=True
 import udpmsg4
@@ -24,9 +25,11 @@ hubfd=hub.fileno()
 success=[]
 eagain=[]
 queue=dict()
-#sha512cache=[]
+sha512cache=[]
 cache=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 cache.connect(('127.15.78.3',15256))
+cache.setblocking(0)
+cachefd=cache.fileno()
 while 1:
     message=''
     message+='hub.py '+pid+' SUCCESS ['
@@ -97,8 +100,13 @@ while 1:
         #    sha512cache+=[sha512sum]
 
         cache.send(this_packet)
-        database=cache.recv(1024)
-        if not chr(1) in database:
+        cachedb=''
+        while cachedb!='':
+            try:
+                cachedb=ord(cache.recv(1))
+            except:
+                cachedb=''
+        if cachedb!=1:
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if remotesockdir+'/'+this_socket!=this_client:

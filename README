@@ -1,6 +1,6 @@
 use make.sh to configure/install hub and peerings.
-depends on uscpi-tcp, daemontools, python2.6, and
-ucspi-client2server ( from cloudircd ).
+depends on uscpi-tcp, daemontools, python2.6, nacl,
+and ucspi-client2server ( from cloudircd ).
 
 configure hub:
     mkdir -p /path/for/hub/socket/dir
