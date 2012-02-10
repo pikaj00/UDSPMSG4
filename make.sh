@@ -56,6 +56,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
 
     read -p "[Y/N] use this configuration?: " qna
     if [[ "$qna" != *Y* ]] || [[ "$qna" == *y* ]]; then
+        echo -n $client2server>env/client2server
 
         for this_peer in `ls peers` ; do
             mkdir -p /service/udpmsg4.$this_peer
