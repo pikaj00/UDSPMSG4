@@ -98,6 +98,7 @@ while 1:
         #    if len(sha512cache)==65536:
         #        sha512cache=sha512cache[1::]
         #    sha512cache+=[sha512sum]
+
         cachedb=''
         while cachedb!='':
             try:
