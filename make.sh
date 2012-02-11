@@ -1,13 +1,13 @@
 #!/bin/sh
 this_dir=`pwd`
-mkdir -p conf
+mkdir -p env
 touch env/this_ip
 touch env/hub_socket
 touch env/remote_sockets
 touch env/client2server
 touch env/naive
 read -p "[Y/N] make hub?: " qna
-if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
+if [[ "${qna//y/Y}" == *Y* ]]; then
     echo "[Default] `cat env/this_ip`"
     read -p "[Enter] this ip: " this_ip
     [[ "$this_ip" == '' ]] && this_ip=`cat env/this_ip`
@@ -31,7 +31,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
         /path/to/hubtools/hashcache: $naive"
 
     read -p "[Y/N] use this configuration?: " qna
-    if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
+    if [[ "${qna//y/Y}" == *Y* ]]; then
         echo -n $this_ip>env/this_ip
         echo -n $hub_socket>env/hub_socket
         echo -n $remote_sockets>env/remote_sockets
@@ -63,7 +63,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
 fi
 
 read -p "[Y/N] make peers?: " qna
-if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
+if [[ "${qna//y/Y}" == *Y* ]]; then
     echo "[Default] `cat env/client2server`"
     read -p "[Enter] /path/to/ucspi-client2server: " client2server
     [[ "$client2server" == '' ]] && remote_sockets=`cat env/client2server`
@@ -72,7 +72,7 @@ if [[ "$qna" == *Y* ]] || [[ "$qna" == *y* ]]; then
         /path/to/ucspi-client2server: $client2server"
 
     read -p "[Y/N] use this configuration?: " qna
-    if [[ "$qna" != *Y* ]] || [[ "$qna" == *y* ]]; then
+    if [[ "${qna//y/Y}" == *Y* ]]; then
         echo -n $client2server>env/client2server
 
         for this_peer in `ls peers` ; do
