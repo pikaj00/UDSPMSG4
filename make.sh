@@ -42,7 +42,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         cp hub.py /service/udpmsg4.hub/hub.py
         cp udpmsg4.py /service/udpmsg4.hub/udpmsg4.py
         chmod +x /service/udpmsg4.hub/run
-        [ -e /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
+        [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
 
         mkdir -p /service/udpmsg4.cache
         cp run.cache /service/udpmsg4.cache/run
@@ -58,7 +58,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         cp run.client /service/udpmsg4.client/run
         cp stream.py /service/udpmsg4.client/stream.py
         chmod +x /service/udpmsg4.client/run
-        [ -e /service/udpmsg4.client/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.client )
+        [ -L /service/udpmsg4.client/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.client )
     fi
 fi
 
@@ -80,9 +80,9 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
             cp run.peer /service/udpmsg4.$this_peer/run
             cp stream.py /service/udpmsg4.$this_peer/stream.py
             chmod +x /service/udpmsg4.$this_peer/run
-            [ -e /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
-            [ -e /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
-            [ -e /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
+            [ -L /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
+            [ -L /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
+            [ -L /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
         done
     fi
 fi
