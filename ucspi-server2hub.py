@@ -22,7 +22,7 @@ def filter(kvps):
             if config.accept[key]!=None:
                 if key in kvps:
                     if config.accept[key]!=kvps[key]:
-                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'/'+config.accept[key]+'] != ['+key+'/'+kvps[key]+']\n')
+                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'='+config.accept[key]+'] != ['+key+'='+kvps[key]+']\n')
                         return 0
         if None in config.accept.keys():
             if not config.accept[None] in kvps.values():
@@ -38,7 +38,7 @@ def filter(kvps):
             if config.reject[key]!=None:
                 if key in kvps.keys():
                     if config.reject[key]==kvps[key]:
-                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'/'+config.reject[key]+'] == ['+key+'/'+kvps[key]+']\n')
+                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'='+config.reject[key]+'] == ['+key+'='+kvps[key]+']\n')
                         return 0
         if None in config.reject.keys():
             if config.reject[None] in kvps.values():
