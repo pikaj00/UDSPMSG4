@@ -19,3 +19,7 @@ rm peer:
     svc -d /service/udpmsg4.$peer_name
     rm /service/udpmsg4.$peer_name
     mv peers/$peer_name peers/.$peer_name
+
+configure ucspi-server2hub:
+    # ./make.sh and yes for make ucspi-server2hub.
+    # follow in configuration prompts.

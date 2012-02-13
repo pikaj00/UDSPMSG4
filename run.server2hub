@@ -1,0 +1,2 @@
+#!/bin/sh -e
+exec tcpserver -H -R -l `cat servip` `cat servip` 15783 tcpclient -H -R -l `cat servip` `cat hubip` 15783 python ucspi-server2hub

@@ -1,11 +1,14 @@
 #!/bin/sh
+
 this_dir=`pwd`
 mkdir -p env
+mkdir -p env/servers
 touch env/this_ip
 touch env/hub_socket
 touch env/remote_sockets
 touch env/client2server
 touch env/naive
+
 read -p "[Y/N] make hub?: " qna
 if [[ "${qna//y/Y}" == *Y* ]]; then
     echo "[Default] `cat env/this_ip`"
@@ -84,5 +87,69 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
             [ -L /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
             [ -L /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
         done
+    fi
+fi
+
+read -p "[Y/N] make ucspi-server2hub?: " qna
+if [[ "${qna//y/Y}" == *Y* ]]; then
+    read -p "[Y/N] configure ucspi-server2hub?: " qna
+    if [[ "${qna//y/Y}" == *Y* ]]; then
+        read -p "[Enter] servname: " servname
+        read -p "[Enter] servip: " servip
+        read -p "[Enter] hubip: " hubip
+
+        echo "[Proposed configuration]
+        servname: $servname
+        servip: $servip
+        hubip: $hubip"
+
+        read -p "[Y/N] use this configuration?: " qna
+        if [[ "${qna//y/Y}" == *Y* ]]; then
+            mkdir env/servers/$servname
+            echo -n $servip>env/servers/servip
+            echo -n $hubip>env/servers/hubip
+
+            for this_serv in `ls env/servers` ; do
+                mkdir -p /service/udpmsg4.$this_serv
+                cp run.server2hub /service/udpmsg4.$this_serv/run
+                cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
+                cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
+                [ -L /service/udpmsg4.$this_serv/env/servip ] ||
+                    ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
+                [ -L /service/udpmsg4.$server/env/hubip ] ||
+                    ( cd / ; ln -s $this_dir/env/servers/$this_serv/hubip /service/udpmsg4.$this_serv )
+                chmod +x /service/udpmsg4.$server/run
+            done
+        fi
+    fi
+
+    if [[ $(ls env/servers) == '' ]]; then
+        read -p "[Enter] servname: " servname
+        read -p "[Enter] servip: " servip
+        read -p "[Enter] hubip: " hubip
+
+        echo "[Proposed configuration]
+        servname: $servname
+        servip: $servip
+        hubip: $hubip"
+
+        read -p "[Y/N] use this configuration?: " qna
+        if [[ "${qna//y/Y}" == *Y* ]]; then
+            mkdir env/servers/$servname
+            echo -n $servip>env/servers/servip
+            echo -n $hubip>env/servers/hubip
+
+            for this_serv in `ls env/servers` ; do
+                mkdir -p /service/udpmsg4.$this_serv
+                cp run.server2hub /service/udpmsg4.$this_serv/run
+                cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
+                cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
+                [ -L /service/udpmsg4.$this_serv/env/servip ] ||
+                    ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
+                [ -L /service/udpmsg4.$server/env/hubip ] ||
+                    ( cd / ; ln -s $this_dir/env/servers/$this_serv/hubip /service/udpmsg4.$this_serv )
+                chmod +x /service/udpmsg4.$server/run
+            done
+        fi
     fi
 fi
