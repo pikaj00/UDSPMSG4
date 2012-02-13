@@ -9,6 +9,7 @@ config.mtime=os.path.getmtime('config.py')
 
 def filter(kvps):
     if kvps==0:
+        os.write(2,'ucspi-server2hub: '+PID+' REJECTING UDPMSG4 PROTOCOL ERROR\n')
         return 0
     if config.accept!={}:
         for key in config.accept.keys():
@@ -16,26 +17,32 @@ def filter(kvps):
                 if not key in kvps.keys():
                     for this_key in kvps.keys():
                         if not this_key in config.accept:
+                            os.write(2,'ucspi-server2hub: '+PID+' KEY ['+this_key+'] NOT IN ACCEPT\n')
                             return 0
             if config.accept[key]!=None:
                 if key in kvps:
                     if config.accept[key]!=kvps[key]:
+                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'/'+config.accept[key]+'] != ['+key+'/'+kvps[key]+']\n')
                         return 0
         if None in config.accept.keys():
             if not config.accept[None] in kvps.values():
+                os.write(2,'ucspi-server2hub: '+PID+' VALUE ['+config.accept[None]+'] NOT IN PACKET\n')
                 return 0
 
     if config.reject!={}:
         for key in config.reject.keys():
             if config.reject[key]==None:
                 if key in kvps.keys():
+                    os.write(2,'ucspi-server2hub: '+PID+' KEY ['+key+'] IN REJECT\n')
                     return 0
             if config.reject[key]!=None:
                 if key in kvps.keys():
                     if config.reject[key]==kvps[key]:
+                        os.write(2,'ucspi-server2hub: '+PID+' KEY/VALUE ['+key+'/'+config.reject[key]+'] == ['+key+'/'+kvps[key]+']\n')
                         return 0
         if None in config.reject.keys():
             if config.reject[None] in kvps.values():
+                os.write(2,'ucspi-server2hub: '+PID+' VALUE ['+config.reject[None]+'] IN PACKET\n')
                 return 0
     return kvps
 
