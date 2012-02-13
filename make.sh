@@ -106,8 +106,8 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         read -p "[Y/N] use this configuration?: " qna
         if [[ "${qna//y/Y}" == *Y* ]]; then
             mkdir env/servers/$servname
-            echo -n $servip>env/servers/servip
-            echo -n $hubip>env/servers/hubip
+            echo -n $servip>env/servers/$servname/servip
+            echo -n $hubip>env/servers/$servname/hubip
 
             for this_serv in `ls env/servers` ; do
                 mkdir -p /service/udpmsg4.$this_serv
@@ -118,7 +118,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
                 [ -L /service/udpmsg4.$server/env/hubip ] ||
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/hubip /service/udpmsg4.$this_serv )
-                chmod +x /service/udpmsg4.$server/run
+                chmod +x /service/udpmsg4.$this_serv/run
             done
         fi
     fi
@@ -136,8 +136,8 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         read -p "[Y/N] use this configuration?: " qna
         if [[ "${qna//y/Y}" == *Y* ]]; then
             mkdir env/servers/$servname
-            echo -n $servip>env/servers/servip
-            echo -n $hubip>env/servers/hubip
+            echo -n $servip>env/servers/$servname/servip
+            echo -n $hubip>env/servers/$servname/hubip
 
             for this_serv in `ls env/servers` ; do
                 mkdir -p /service/udpmsg4.$this_serv
@@ -148,7 +148,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
                 [ -L /service/udpmsg4.$server/env/hubip ] ||
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/hubip /service/udpmsg4.$this_serv )
-                chmod +x /service/udpmsg4.$server/run
+                chmod +x /service/udpmsg4.$this_serv/run
             done
         fi
     fi
