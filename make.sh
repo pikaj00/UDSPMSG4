@@ -112,6 +112,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
             for this_serv in `ls env/servers` ; do
                 mkdir -p /service/udpmsg4.$this_serv
                 cp run.server2hub /service/udpmsg4.$this_serv/run
+                cp udpmsg4.py /service/udpmsg4.$this_serv/udpmsg4.py
                 cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
                 cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
                 [ -L /service/udpmsg4.$this_serv/env/servip ] ||
@@ -142,6 +143,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
             for this_serv in `ls env/servers` ; do
                 mkdir -p /service/udpmsg4.$this_serv
                 cp run.server2hub /service/udpmsg4.$this_serv/run
+                cp udpmsg4.py /service/udpmsg4.$this_serv/udpmsg4.py
                 cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
                 cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
                 [ -L /service/udpmsg4.$this_serv/env/servip ] ||
