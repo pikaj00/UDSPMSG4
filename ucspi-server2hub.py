@@ -68,7 +68,7 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' rejected packet from server\n')
         else:
             CLIENT_QUEUE+=[packet]
-            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 0 in readable:
         packet=os.read(0,65536)
@@ -80,7 +80,7 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' rejected packet from client\n')
         else:
             SERVER_QUEUE+=[packet]
-            os.write(2,'ucspi-server2hub: '+PID+' SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     try:
         writeable=selections([],[1,7],[],1/abs(len(CLIENT_QUEUE)-len(SERVER_QUEUE)))[1]
@@ -100,11 +100,11 @@ while 1:
         if packet_length==write_length:
             CLIENT_QUEUE.popleft()
             os.write(2,'ucspi-server2hub: '+PID+' successful write to client\n')
-            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
             CLIENT_QUEUE[0]=packet[write_length::]
             os.write(2,'ucspi-server2hub: '+PID+' could not write complete packet to client\n')
-            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 7 in writeable and len(SERVER_QUEUE)!=0:
         write_length=0
@@ -119,8 +119,8 @@ while 1:
         if packet_length==write_length:
             SERVER_QUEUE.popleft()
             os.write(2,'ucspi-server2hub: '+PID+' successful write to server\n')
-            os.write(2,'ucspi-server2hub: '+PID+' SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
             SERVER_QUEUE[0]=packet[write_length::]
             os.write(2,'ucspi-server2hub: '+PID+' could not write complete packet to server\n')
-            os.write(2,'ucspi-server2hub: '+PID+' SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
