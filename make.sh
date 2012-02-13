@@ -105,7 +105,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
 
         read -p "[Y/N] use this configuration?: " qna
         if [[ "${qna//y/Y}" == *Y* ]]; then
-            mkdir env/servers/$servname
+            mkdir -p env/servers/$servname
             echo -n $servip>env/servers/$servname/servip
             echo -n $hubip>env/servers/$servname/hubip
 
@@ -135,7 +135,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
 
         read -p "[Y/N] use this configuration?: " qna
         if [[ "${qna//y/Y}" == *Y* ]]; then
-            mkdir env/servers/$servname
+            mkdir -p env/servers/$servname
             echo -n $servip>env/servers/$servname/servip
             echo -n $hubip>env/servers/$servname/hubip
 
