@@ -9,7 +9,6 @@ config.mtime=os.path.getmtime('config.py')
 
 def filter(kvps):
     if kvps==0:
-        os.write(2,'ucspi-server2hub: '+PID+' REJECTING UDPMSG4 PROTOCOL ERROR\n')
         return 0
     if config.accept!={}:
         for key in config.accept.keys():
@@ -65,7 +64,7 @@ while 1:
             break
         kvps=filter(udpmsg4.unframe(packet))
         if kvps==0:
-            os.write(2,'ucspi-server2hub: '+PID+' rejected packet from server\n')
+            os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from server\n')
         else:
             CLIENT_QUEUE+=[packet]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
@@ -77,7 +76,7 @@ while 1:
             break
         kvps=filter(udpmsg4.unframe(packet))
         if kvps==0:
-            os.write(2,'ucspi-server2hub: '+PID+' rejected packet from client\n')
+            os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from client\n')
         else:
             SERVER_QUEUE+=[packet]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
