@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys, os, select, collections
 PID='['+str(os.getpid())+']'
+from hashlib import sha512
 selections=select.select
 
 sys.dont_write_bytecode=True
@@ -47,6 +48,7 @@ def filter(kvps):
 
 CLIENT_QUEUE=collections.deque([],128)
 SERVER_QUEUE=collections.deque([],128)
+SHA512_CACHE=collections.deque([],4096)
 while 1:
     if config.mtime!=os.path.getmtime('config.py'):
         config.mtime=os.path.getmtime('config.py')
@@ -69,10 +71,12 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
             break
         kvps=filter(udpmsg4.unframe(packet))
+        checksum=sha512(packet).digest()
         if kvps==0:
             os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from server\n')
-        else:
+        elif not checksum in SHA512_CACHE:
             CLIENT_QUEUE+=[packet]
+            SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 0 in readable:
@@ -87,10 +91,12 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
             break
         kvps=filter(udpmsg4.unframe(packet))
+        checksum=sha512(packet).digest()
         if kvps==0:
             os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from client\n')
-        else:
+        elif not checksum in SHA512_CACHE:
             SERVER_QUEUE+=[packet]
+            SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     try:
@@ -106,7 +112,6 @@ while 1:
             try:
                 write_length=os.write(1,packet[write_length::])
             except:
-                os.write(2,'ucspi-server2hub: '+PID+' failed to write to client\n')
                 break
         if packet_length==write_length:
             CLIENT_QUEUE.popleft()
@@ -115,6 +120,9 @@ while 1:
         elif write_length>0:
             CLIENT_QUEUE[0]=packet[write_length::]
             os.write(2,'ucspi-server2hub: '+PID+' could not write complete packet to client\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+        elif write_length==0:
+            os.write(2,'ucspi-server2hub: '+PID+' failed to write to client\n')
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 7 in writeable and len(SERVER_QUEUE)!=0:
@@ -125,7 +133,6 @@ while 1:
             try:
                 write_length=os.write(7,packet[write_length::])
             except:
-                os.write(2,'ucspi-server2hub: '+PID+' failed to write to server\n')
                 break
         if packet_length==write_length:
             SERVER_QUEUE.popleft()
@@ -134,4 +141,7 @@ while 1:
         elif write_length>0:
             SERVER_QUEUE[0]=packet[write_length::]
             os.write(2,'ucspi-server2hub: '+PID+' could not write complete packet to server\n')
+            os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+        elif write_length==0:
+            os.write(2,'ucspi-server2hub: '+PID+' failed to write to server\n')
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
