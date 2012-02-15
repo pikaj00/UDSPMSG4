@@ -60,14 +60,14 @@ while 1:
         readable=selections([0,6],[],[],1)[0]
 
     if 6 in readable:
-        packet=os.read(6,2)
-        if not packet:
-            os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
-            break
-        packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-        while len(packet[2::])!=packet_length:
-            packet+=os.read(6,packet_length-len(packet[2::]))
-        if not packet:
+        try:
+            packet=os.read(6,2)
+            packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
+            while len(packet[2::])!=packet_length:
+                packet+=os.read(6,packet_length-len(packet[2::]))
+        except:
+            pass
+        if packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
             break
         kvps=filter(udpmsg4.unframe(packet))
@@ -80,14 +80,14 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 0 in readable:
-        packet=os.read(0,2)
-        if not packet:
-            os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
-            break
-        packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-        while len(packet[2::])!=packet_length:
-            packet+=os.read(0,packet_length-len(packet[2::]))
-        if not packet:
+        try:
+            packet=os.read(0,2)
+            packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
+            while len(packet[2::])!=packet_length:
+                packet+=os.read(0,packet_length-len(packet[2::]))
+        except:
+            pass
+        if packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
             break
         kvps=filter(udpmsg4.unframe(packet))
