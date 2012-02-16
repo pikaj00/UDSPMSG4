@@ -70,11 +70,11 @@ while 1:
         if packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
             break
-        kvps=filter(udpmsg4.unframe(packet))
+        kvps=udpmsg4.unframe(packet)
         checksum=sha512(packet).digest()
         if kvps==0:
             os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from server\n')
-        elif not checksum in SHA512_CACHE:
+        elif not checksum in SHA512_CACHE and filter(kvps)!=0:
             CLIENT_QUEUE+=[packet]
             SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
@@ -90,11 +90,11 @@ while 1:
         if packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
             break
-        kvps=filter(udpmsg4.unframe(packet))
+        kvps=udpmsg4.unframe(packet)
         checksum=sha512(packet).digest()
         if kvps==0:
             os.write(2,'ucspi-server2hub: '+PID+' rejected protocol error from client\n')
-        elif not checksum in SHA512_CACHE:
+        elif not checksum in SHA512_CACHE and filter(kvps)!=0:
             SERVER_QUEUE+=[packet]
             SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
