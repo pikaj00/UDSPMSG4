@@ -54,9 +54,12 @@ while 1:
         config.mtime=os.path.getmtime('config.py')
         reload(config)
 
-    try:
-        readable=selections([0,6],[],[],1/abs(len(CLIENT_QUEUE)-len(SERVER_QUEUE)))[0]
-    except ZeroDivisionError:
+    TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
+    if TIMEOUT>=128:
+        readable=selections([0,6],[],[],1)[0]
+    elif TIMEOUT>0:
+        readable=selections([0,6],[],[],TIMEOUT)[0]
+    elif TIMEOUT==0:
         readable=selections([0,6],[],[],1)[0]
 
     if 6 in readable:
