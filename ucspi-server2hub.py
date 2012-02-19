@@ -54,14 +54,15 @@ while 1:
         config.mtime=os.path.getmtime('config.py')
         reload(config)
 
-    TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
-    if TIMEOUT>=128:
-        readable=selections([0,6],[],[],1)[0]
-    elif TIMEOUT>0:
-        readable=selections([0,6],[],[],TIMEOUT)[0]
-    elif TIMEOUT==0:
-        readable=selections([0,6],[],[],1)[0]
+#    TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
+#    if TIMEOUT>=128:
+#        readable=selections([0,6],[],[],1)[0]
+#    elif TIMEOUT>0:
+#        readable=selections([0,6],[],[],TIMEOUT)[0]
+#    elif TIMEOUT==0:
+#        readable=selections([0,6],[],[],1)[0]
 
+    readable=selections([0,6],[],[],1)[0]
     if 6 in readable:
         try:
             packet=os.read(6,2)
@@ -102,12 +103,12 @@ while 1:
             SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
-    try:
-        writeable=selections([],[1,7],[],1/abs(len(CLIENT_QUEUE)-len(SERVER_QUEUE)))[1]
-    except ZeroDivisionError:
-        writeable=selections([],[1,7],[],1)[1]
+#    try:
+#        writeable=selections([],[1,7],[],1/abs(len(CLIENT_QUEUE)-len(SERVER_QUEUE)))[1]
+#    except ZeroDivisionError:
+#        writeable=selections([],[1,7],[],1)[1]
 
-    if 1 in writeable and len(CLIENT_QUEUE)!=0:
+    if len(CLIENT_QUEUE)!=0:
         write_length=0
         packet=CLIENT_QUEUE[0]
         packet_length=len(packet)
@@ -128,7 +129,7 @@ while 1:
             os.write(2,'ucspi-server2hub: '+PID+' failed to write to client\n')
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
-    if 7 in writeable and len(SERVER_QUEUE)!=0:
+    if len(SERVER_QUEUE)!=0:
         write_length=0
         packet=SERVER_QUEUE[0]
         packet_length=len(packet)
