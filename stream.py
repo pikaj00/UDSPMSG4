@@ -42,19 +42,14 @@ while 1:
             os.write(2,'stream.py '+pid+' reading from clientfd\n')
             hub_packet=client.recv(65536)
             hub_packet=chr(int(round(len(hub_packet)/256)))+chr(int(round(len(hub_packet)%256)))+hub_packet
-            if not hub_packet:
-                os.write(2,'stream.py '+pid+' connection closed from remote\n')
-                os.remove(pathclient)
-                break
-
-            toremote+=hub_packet
-            write_length=0
-            packet_length=len(toremote)
-            if packet_length==0:
+            if not hub_packet or len(hub_packet)==0:
                 os.write(2,'stream.py '+pid+' connection closed from remote\n')
                 os.remove(pathclient)
                 break
             try:
+                toremote+=hub_packet
+                write_length=0
+                packet_length=len(toremote)
                 while write_length!=packet_length:
                     os.write(2,'stream.py '+pid+' try to write '+str(packet_length)+'\n')
                     os.write(2,'stream.py '+pid+' in loop start poll for write\n')
