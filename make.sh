@@ -114,7 +114,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
                 cp run.server2hub /service/udpmsg4.$this_serv/run
                 cp udpmsg4.py /service/udpmsg4.$this_serv/udpmsg4.py
                 cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
-                cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
+                [ -e /service/udpmsg4.$this_serv/config.py ] || cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
                 [ -L /service/udpmsg4.$this_serv/env/servip ] ||
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
                 [ -L /service/udpmsg4.$server/env/hubip ] ||
@@ -145,7 +145,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
                 cp run.server2hub /service/udpmsg4.$this_serv/run
                 cp udpmsg4.py /service/udpmsg4.$this_serv/udpmsg4.py
                 cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
-                cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
+                [ -e /service/udpmsg4.$this_serv/config.py ] || cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
                 [ -L /service/udpmsg4.$this_serv/env/servip ] ||
                     ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
                 [ -L /service/udpmsg4.$server/env/hubip ] ||
