@@ -108,7 +108,8 @@ while 1:
 #    except ZeroDivisionError:
 #        writeable=selections([],[1,7],[],1)[1]
 
-    if len(CLIENT_QUEUE)!=0:
+    writeable=selections([],[1,7],[],1)[1]
+    if 1 in writeable and len(CLIENT_QUEUE)!=0:
         write_length=0
         packet=CLIENT_QUEUE[0]
         packet_length=len(packet)
@@ -128,8 +129,11 @@ while 1:
         elif write_length==0:
             os.write(2,'ucspi-server2hub: '+PID+' failed to write to client\n')
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+    elif not 1 in writeable and len(CLIENT_QUEUE)!=0:
+        os.write(2,'ucspi-server2hub: '+PID+' failed to write to client\n')
+        os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
-    if len(SERVER_QUEUE)!=0:
+    if 7 in writeable and len(SERVER_QUEUE)!=0:
         write_length=0
         packet=SERVER_QUEUE[0]
         packet_length=len(packet)
@@ -149,3 +153,6 @@ while 1:
         elif write_length==0:
             os.write(2,'ucspi-server2hub: '+PID+' failed to write to server\n')
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+    elif not 7 in writeable and len(SERVER_QUEUE)!=0:
+        os.write(2,'ucspi-server2hub: '+PID+' failed to write to server\n')
+        os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
