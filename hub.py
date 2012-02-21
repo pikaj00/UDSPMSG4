@@ -83,7 +83,7 @@ while 1:
     message=''
     for key in clientsocketpaths:
         if not key in queue:
-            queue[key]=collections.deque([],128)
+            queue[key]=collections.deque([],4096)
             message+=os.path.basename(key)+','
     if len(message)>0:
         message='hub.py '+pid+' NEW ['+message+']\n'
