@@ -31,6 +31,7 @@ cache.connect(('127.15.78.3',15256))
 cache.setblocking(0)
 cachefd=cache.fileno()
 while 1:
+    maxqueue=128*len(os.listdir(remotesockdir))
     message=''
     message+='hub.py '+pid+' SUCCESS ['
     for this_socket in success:
@@ -42,7 +43,7 @@ while 1:
         message+=this_socket+','
     message+=']'
     eagain=[]
-    message+=' QUEUE ['
+    message+=' MAXQUEUE ['+str(maxqueue)+'] QUEUE ['
     for key in queue.keys():
         message+=os.path.basename(key)+'='+str(len(queue[key]))
         if not key in clientsocketpaths:
@@ -73,6 +74,8 @@ while 1:
                     os.write(2,'hub.py '+pid+' error: cannot write to '+key+' '+str(ex.errno)+'\n')
                 if ex.errno == 11:
                     os.write(2,'hub.py '+pid+' error: try again write to '+key+' (still '+str(len(queue[key]))+')\n')
+        if len(queue[key])<=maxqueue:
+            queue[key]=collections.deque(queue[key],maxqueue)
     if queued>0:
         timeout=1.0/queued
     else:
@@ -83,7 +86,7 @@ while 1:
     message=''
     for key in clientsocketpaths:
         if not key in queue:
-            queue[key]=collections.deque([],4096)
+            queue[key]=collections.deque([],maxqueue)
             message+=os.path.basename(key)+','
     if len(message)>0:
         message='hub.py '+pid+' NEW ['+message+']\n'
@@ -118,6 +121,8 @@ while 1:
             packet_length=len(this_packet)
             for this_socket in os.listdir(remotesockdir):
                 if remotesockdir+'/'+this_socket!=this_client:
+                    if not this_socket in queue:
+                        break
                     if len(queue[this_socket])==0:
                         try:
                             write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
