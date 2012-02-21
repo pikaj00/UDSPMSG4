@@ -122,8 +122,8 @@ while 1:
             for this_socket in os.listdir(remotesockdir):
                 if remotesockdir+'/'+this_socket!=this_client:
                     if not this_socket in queue:
-                        break
-                    if len(queue[this_socket])==0:
+                        pass
+                    elif len(queue[this_socket])==0:
                         try:
                             write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
                             if write_length!=packet_length:
