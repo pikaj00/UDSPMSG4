@@ -46,6 +46,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         cp udpmsg4.py /service/udpmsg4.hub/udpmsg4.py
         chmod +x /service/udpmsg4.hub/run
         [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
+        [ -e /service/udpmsg4.hub/config.py ] || cp hub.config.py /service/udpmsg4.hub/config.py
 
         mkdir -p /service/udpmsg4.cache
         cp run.cache /service/udpmsg4.cache/run
@@ -69,7 +70,7 @@ read -p "[Y/N] make peers?: " qna
 if [[ "${qna//y/Y}" == *Y* ]]; then
     echo "[Default] `cat env/client2server`"
     read -p "[Enter] /path/to/ucspi-client2server: " client2server
-    [[ "$client2server" == '' ]] && remote_sockets=`cat env/client2server`
+    [[ "$client2server" == '' ]] && client2server=`cat env/client2server`
 
     echo "[Proposed configuration]
         /path/to/ucspi-client2server: $client2server"
@@ -92,7 +93,7 @@ fi
 
 read -p "[Y/N] make ucspi-server2hub?: " qna
 if [[ "${qna//y/Y}" == *Y* ]]; then
-    read -p "[Y/N] configure ucspi-server2hub?: " qna
+    read -p "[Y/N] configure new ucspi-server2hub?: " qna
     if [[ "${qna//y/Y}" == *Y* ]]; then
         read -p "[Enter] servname: " servname
         read -p "[Enter] servip: " servip
@@ -153,5 +154,19 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
                 chmod +x /service/udpmsg4.$this_serv/run
             done
         fi
+
+    elif [[ $(ls env/servers) != '' ]]; then
+        for this_serv in `ls env/servers` ; do
+            mkdir -p /service/udpmsg4.$this_serv
+            cp run.server2hub /service/udpmsg4.$this_serv/run
+            cp udpmsg4.py /service/udpmsg4.$this_serv/udpmsg4.py
+            cp ucspi-server2hub.py /service/udpmsg4.$this_serv/ucspi-server2hub.py
+            [ -e /service/udpmsg4.$this_serv/config.py ] || cp ucspi-server2hub.config.py /service/udpmsg4.$this_serv/config.py
+            [ -L /service/udpmsg4.$this_serv/env/servip ] ||
+                ( cd / ; ln -s $this_dir/env/servers/$this_serv/servip /service/udpmsg4.$this_serv )
+            [ -L /service/udpmsg4.$server/env/hubip ] ||
+                ( cd / ; ln -s $this_dir/env/servers/$this_serv/hubip /service/udpmsg4.$this_serv )
+            chmod +x /service/udpmsg4.$this_serv/run
+        done
     fi
 fi

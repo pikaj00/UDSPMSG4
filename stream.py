@@ -35,7 +35,9 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+PID+' rejected protocol error from server\n')
+            os.write(2,'stream.py: '+PID+' connection to server died\n')
+            os.remove(pathstream)
+            break
         else:
             CLIENT_QUEUE+=[packet]
             os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
@@ -54,7 +56,9 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+PID+' rejected protocol error from client\n')
+            os.write(2,'stream.py: '+PID+' connection to client died\n')
+            os.remove(pathstream)
+            break
         else:
             SERVER_QUEUE+=[packet]
             os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')

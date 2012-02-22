@@ -54,24 +54,20 @@ while 1:
         config.mtime=os.path.getmtime('config.py')
         reload(config)
 
-#    TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
-#    if TIMEOUT>=128:
-#        readable=selections([0,6],[],[],1)[0]
-#    elif TIMEOUT>0:
-#        readable=selections([0,6],[],[],TIMEOUT)[0]
-#    elif TIMEOUT==0:
-#        readable=selections([0,6],[],[],1)[0]
-
     readable=selections([0,6],[],[],1)[0]
     if 6 in readable:
         try:
+            packet_length=0
             packet=os.read(6,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while len(packet[2::])!=packet_length:
                 packet+=os.read(6,packet_length-len(packet[2::]))
         except:
             pass
-        if packet_length!=len(packet[2::]):
+        if packet_length==0:
+            os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
+            break
+        elif packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to server died\n')
             break
         kvps=udpmsg4.unframe(packet)
@@ -85,13 +81,17 @@ while 1:
 
     if 0 in readable:
         try:
+            packet_length=0
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while len(packet[2::])!=packet_length:
                 packet+=os.read(0,packet_length-len(packet[2::]))
         except:
             pass
-        if packet_length!=len(packet[2::]):
+        if packet_length==0:
+            os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
+            break
+        elif packet_length!=len(packet[2::]):
             os.write(2,'ucspi-server2hub: '+PID+' connection to client died\n')
             break
         kvps=udpmsg4.unframe(packet)
@@ -102,11 +102,6 @@ while 1:
             SERVER_QUEUE+=[packet]
             SHA512_CACHE+=[checksum]
             os.write(2,'ucspi-server2hub: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
-
-#    try:
-#        writeable=selections([],[1,7],[],1/abs(len(CLIENT_QUEUE)-len(SERVER_QUEUE)))[1]
-#    except ZeroDivisionError:
-#        writeable=selections([],[1,7],[],1)[1]
 
     writeable=selections([],[1,7],[],1)[1]
     if 1 in writeable and len(CLIENT_QUEUE)!=0:
