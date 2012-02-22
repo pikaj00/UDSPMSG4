@@ -161,31 +161,32 @@ while 1:
             except:
                 pass
 
-        kvps=udpmsg4.unframe(this_packet)
-        packet_test=filter(kvps)
-        if cachedb!=1 and kvps!=0 and packet_test!=0:
-            packet_length=len(this_packet)
-            for this_socket in os.listdir(remotesockdir):
-                if remotesockdir+'/'+this_socket!=this_client:
-                    if not this_socket in queue:
-                        break
-                    if len(queue[this_socket])==0:
-                        try:
-                            write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
-                            if write_length!=packet_length:
-                                os.write(2,'hub.py: '+PID+' error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
-                            os.write(2,'hub.py: '+PID+' success: can write to '+this_socket+'\n')
-                            success+=[this_socket]
-                        except socket.error, ex:
-                            if ex.errno == 111:
-                                os.write(2,'hub.py: '+PID+' socket dead '+remotesockdir+'/'+this_socket+'\n')
-                                os.remove(remotesockdir+'/'+this_socket)
-                            if ex.errno != 11:
-                                os.write(2,'hub.py: '+PID+' error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
-                            if ex.errno == 11:
-                                eagain+=[this_socket]
-                                queue[this_socket].append(this_packet)
+        if cachedb!=1:
+            kvps=udpmsg4.unframe(this_packet)
+            packet_test=filter(kvps)
+            if kvps!=0 and packet_test!=0:
+                packet_length=len(this_packet)
+                for this_socket in os.listdir(remotesockdir):
+                    if remotesockdir+'/'+this_socket!=this_client:
+                        if not this_socket in queue:
+                            break
+                        if len(queue[this_socket])==0:
+                            try:
+                                write_length=hub.sendto(this_packet,remotesockdir+'/'+this_socket)
+                                if write_length!=packet_length:
+                                    os.write(2,'hub.py: '+PID+' error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
+                                os.write(2,'hub.py: '+PID+' success: can write to '+this_socket+'\n')
+                                success+=[this_socket]
+                            except socket.error, ex:
+                                if ex.errno == 111:
+                                    os.write(2,'hub.py: '+PID+' socket dead '+remotesockdir+'/'+this_socket+'\n')
+                                    os.remove(remotesockdir+'/'+this_socket)
+                                if ex.errno != 11:
+                                    os.write(2,'hub.py: '+PID+' error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
+                                if ex.errno == 11:
+                                    eagain+=[this_socket]
+                                    queue[this_socket].append(this_packet)
+                        else:
+                            queue[this_socket].append(this_packet)
                     else:
-                        queue[this_socket].append(this_packet)
-                else:
-                    os.write(2,'hub.py: '+PID+' received from '+this_socket+'\n')
+                        os.write(2,'hub.py: '+PID+' received from '+this_socket+'\n')
