@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, os, select
+import sys, os, select, collections
 from hashlib import *
 import socket
 
@@ -21,6 +21,7 @@ streamfd=stream.fileno()
 
 CLIENT_QUEUE=[]
 SERVER_QUEUE=[]
+SHA512_CACHE=collections.deque([],4096)
 while 1:
     readable=selections([0,streamfd],[],[],1)[0]
     if streamfd in readable:
@@ -39,8 +40,11 @@ while 1:
             os.remove(pathstream)
             break
         else:
-            CLIENT_QUEUE+=[packet]
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            checksum=sha512(packet).digest()
+            if not checksum in SHA512_CACHE:
+                CLIENT_QUEUE+=[packet]
+                SHA512_CACHE+=[checksum]
+                os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 0 in readable:
         try:
@@ -60,8 +64,11 @@ while 1:
             os.remove(pathstream)
             break
         else:
-            SERVER_QUEUE+=[packet]
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            checksum=sha512(packet).digest()
+            if not checksum in SHA512_CACHE:
+                SERVER_QUEUE+=[packet]
+                SHA512_CACHE+=[checksum]
+                os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if len(CLIENT_QUEUE)!=0:
         write_length=0
