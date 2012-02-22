@@ -71,6 +71,10 @@ cache.connect(('127.15.78.3',15256))
 cache.setblocking(0)
 cachefd=cache.fileno()
 while 1:
+    if config.mtime!=os.path.getmtime('config.py'):
+        config.mtime=os.path.getmtime('config.py')
+        reload(config)
+
     maxqueue=128*len(os.listdir(remotesockdir))
     message=''
     message+='hub.py: '+PID+' SUCCESS ['
@@ -157,7 +161,7 @@ while 1:
             except:
                 pass
 
-        kvps=udpmsg4.unframe(packet)
+        kvps=udpmsg4.unframe(this_packet)
         packet_test=filter(kvps)
         if cachedb!=1 and kvps!=0 and packet_test!=0:
             packet_length=len(this_packet)
