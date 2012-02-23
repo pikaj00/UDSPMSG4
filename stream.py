@@ -43,7 +43,9 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+CLIENT+' rejected protocol error from server\n')
+            os.write(2,'stream.py: '+CLIENT+' fatal protocol error from server\n')
+            os.remove(pathstream)
+            break
         else:
             checksum=sha512(packet).digest()
             if not checksum in SHA512_CACHE:
@@ -58,7 +60,12 @@ while 1:
             packet_length=0
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-            packet+=os.read(0,packet_length)
+            while packet_length!=len(packet[2::]):
+                buffer=os.read(0,packet_length-len(packet[2::]))
+                if buffer!='':
+                    packet+=buffer
+                else:
+                    break
         except:
             pass
         if packet_length==0 or len(packet)<=2:
@@ -66,7 +73,9 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+CLIENT+' rejected protocol error from client\n')
+            os.write(2,'stream.py: '+CLIENT+' fatal protocol error from client\n')
+            os.remove(pathstream)
+            break
         else:
             checksum=sha512(packet).digest()
             if not checksum in SHA512_CACHE:
@@ -89,6 +98,7 @@ while 1:
             os.write(2,'stream.py: '+CLIENT+' successful write to client\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
+            CLIENT_QUEUE[0]=packet[write_length::]
             os.write(2,'stream.py: '+CLIENT+' could not write complete packet to client\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
@@ -109,6 +119,7 @@ while 1:
             os.write(2,'stream.py: '+CLIENT+' successful write to server\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
+            SERVER_QUEUE[0]=packet[write_length::]
             os.write(2,'stream.py: '+CLIENT+' could not write complete packet to server\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
