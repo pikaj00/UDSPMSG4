@@ -57,14 +57,14 @@ while 1:
     readable=selections([0,6],[],[],1)[0]
     if 6 in readable:
         try:
+            packet=''
             packet_length=0
             packet=os.read(6,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-            while len(packet[2::])!=packet_length:
-                packet+=os.read(6,packet_length-len(packet[2::]))
+            packet+=os.read(6,packet_length-len(packet[2::]))
         except:
             pass
-        if packet_length==0:
+        if packet_length==0 or len(packet)<=2:
             os.write(2,'ucspi-server2hub: '+CLIENT+' connection to server died\n')
             break
         elif packet_length!=len(packet[2::]):
@@ -81,14 +81,14 @@ while 1:
 
     if 0 in readable:
         try:
+            packet=''
             packet_length=0
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-            while len(packet[2::])!=packet_length:
-                packet+=os.read(0,packet_length-len(packet[2::]))
+            packet+=os.read(0,packet_length-len(packet[2::]))
         except:
             pass
-        if packet_length==0:
+        if packet_length==0 or len(packet)<=2:
             os.write(2,'ucspi-server2hub: '+CLIENT+' connection to client died\n')
             break
         elif packet_length!=len(packet[2::]):
