@@ -89,7 +89,6 @@ while 1:
             os.write(2,'stream.py: '+CLIENT+' successful write to client\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
-            CLIENT_QUEUE[0]=packet[write_length::]
             os.write(2,'stream.py: '+CLIENT+' could not write complete packet to client\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
@@ -110,7 +109,6 @@ while 1:
             os.write(2,'stream.py: '+CLIENT+' successful write to server\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
-            SERVER_QUEUE[0]=packet[write_length::]
             os.write(2,'stream.py: '+CLIENT+' could not write complete packet to server\n')
             os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
