@@ -43,9 +43,7 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+CLIENT+' connection to server died\n')
-            os.remove(pathstream)
-            break
+            os.write(2,'stream.py: '+CLIENT+' rejected protocol error from server\n')
         else:
             checksum=sha512(packet).digest()
             if not checksum in SHA512_CACHE:
@@ -68,9 +66,7 @@ while 1:
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+CLIENT+' connection to client died\n')
-            os.remove(pathstream)
-            break
+            os.write(2,'stream.py: '+CLIENT+' rejected protocol error from client\n')
         else:
             checksum=sha512(packet).digest()
             if not checksum in SHA512_CACHE:
