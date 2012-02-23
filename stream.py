@@ -27,8 +27,8 @@ SHA512_CACHE=collections.deque([],4096)
 while 1:
     TIMEOUT=1+len(CLIENT_QUEUE)+len(SERVER_QUEUE)+READ_TIME+WRITE_TIME
     readable=selections([0,streamfd],[],[],1/TIMEOUT)[0]
-    WRITE_TIME=0
-    READ_TIME=0
+    if WRITE_TIME!=0: WRITE_TIME-=1
+    if READ_TIME!=0: READ_TIME-=1
 
     if streamfd in readable:
         try:
@@ -62,7 +62,7 @@ while 1:
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while packet_length!=len(packet[2::]):
                 READ_TIME+=1
-                if 0 in selections([0],[],[],1)[0]:
+                if 0 in selections([0],[],[],READ_TIME)[0]:
                     buffer=os.read(0,packet_length-len(packet[2::]))
                     if buffer!='':
                         packet+=buffer
