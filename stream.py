@@ -6,7 +6,7 @@ import socket
 selections=select.select
 pathhub=(sys.argv[1])
 PID=str(os.getpid())
-os.write(2,'stream.py '+PID+' starting '+os.getenv('TCPREMOTEIP')+':'+os.getenv('TCPREMOTEPORT')+'\n')
+CLIENT='['+str(os.getpid())+'@'+os.getenv('TCPREMOTEIP')+':'+os.getenv('TCPREMOTEPORT')+']'
 pathstream=sys.argv[2]+'/'+PID
 stream=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 
@@ -23,7 +23,14 @@ CLIENT_QUEUE=[]
 SERVER_QUEUE=[]
 SHA512_CACHE=collections.deque([],4096)
 while 1:
-    readable=selections([0,streamfd],[],[],1)[0]
+    TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
+    if TIMEOUT>128:
+        TIMEOUT=128
+    try:
+        readable=selections([0,streamfd],[],[],1/TIMEOUT)[0]
+    except ZeroDivisionError:
+        readable=selections([0,streamfd],[],[],1)[0]
+
     if streamfd in readable:
         try:
             packet_length=0
@@ -31,12 +38,12 @@ while 1:
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
         except:
             pass
-        if packet_length==0:
-            os.write(2,'stream.py: '+PID+' connection to server died\n')
+        if packet_length==0 or len(packet)<=2:
+            os.write(2,'stream.py: '+CLIENT+' connection to server died\n')
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+PID+' connection to server died\n')
+            os.write(2,'stream.py: '+CLIENT+' connection to server died\n')
             os.remove(pathstream)
             break
         else:
@@ -44,23 +51,24 @@ while 1:
             if not checksum in SHA512_CACHE:
                 CLIENT_QUEUE+=[packet]
                 SHA512_CACHE+=[checksum]
-                os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+                os.write(2,'stream.py: '+CLIENT+' successful read from server\n')
+                os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if 0 in readable:
         try:
+            packet=''
             packet_length=0
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
-            while len(packet[2::])!=packet_length:
-                packet+=os.read(0,packet_length-len(packet[2::]))
+            packet+=os.read(0,packet_length)
         except:
             pass
-        if packet_length==0:
-            os.write(2,'stream.py: '+PID+' connection to client died\n')
+        if packet_length==0 or len(packet)<=2:
+            os.write(2,'stream.py: '+CLIENT+' connection to client died\n')
             os.remove(pathstream)
             break
         elif packet_length!=len(packet[2::]):
-            os.write(2,'stream.py: '+PID+' connection to client died\n')
+            os.write(2,'stream.py: '+CLIENT+' connection to client died\n')
             os.remove(pathstream)
             break
         else:
@@ -68,7 +76,8 @@ while 1:
             if not checksum in SHA512_CACHE:
                 SERVER_QUEUE+=[packet]
                 SHA512_CACHE+=[checksum]
-                os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+                os.write(2,'stream.py: '+CLIENT+' successful read from client\n')
+                os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if len(CLIENT_QUEUE)!=0:
         write_length=0
@@ -81,15 +90,15 @@ while 1:
                 break
         if packet_length==write_length:
             CLIENT_QUEUE=CLIENT_QUEUE[1::]
-            os.write(2,'stream.py: '+PID+' successful write to client\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' successful write to client\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
             CLIENT_QUEUE[0]=packet[write_length::]
-            os.write(2,'stream.py: '+PID+' could not write complete packet to client\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' could not write complete packet to client\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
-            os.write(2,'stream.py: '+PID+' failed to write to client\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' failed to write to client\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
 
     if len(SERVER_QUEUE)!=0:
         write_length=0
@@ -102,12 +111,12 @@ while 1:
                 break
         if packet_length==write_length:
             SERVER_QUEUE=SERVER_QUEUE[1::]
-            os.write(2,'stream.py: '+PID+' successful write to server\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' successful write to server\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length>0:
             SERVER_QUEUE[0]=packet[write_length::]
-            os.write(2,'stream.py: '+PID+' could not write complete packet to server\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' could not write complete packet to server\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
         elif write_length==0:
-            os.write(2,'stream.py: '+PID+' failed to write to server\n')
-            os.write(2,'stream.py: '+PID+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+            os.write(2,'stream.py: '+CLIENT+' failed to write to server\n')
+            os.write(2,'stream.py: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
