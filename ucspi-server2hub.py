@@ -57,10 +57,9 @@ while 1:
     TIMEOUT=len(CLIENT_QUEUE)+len(SERVER_QUEUE)
     if TIMEOUT>128:
         TIMEOUT=128
-    try:
-        readable=selections([0,6],[],[],1/TIMEOUT)[0]
-    except ZeroDivisionError:
-        readable=selections([0,6],[],[],1)[0]
+    elif TIMEOUT==0:
+        TIMEOUT=1
+    readable=selections([0,streamfd],[],[],1/TIMEOUT)[0]
 
     if 6 in readable:
         try:
@@ -69,11 +68,12 @@ while 1:
             packet=os.read(6,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while packet_length!=len(packet[2::]):
-                buffer=os.read(6,packet_length-len(packet[2::]))
-                if buffer!='':
-                    packet+=buffer
-                else:
-                    break
+                if 6 in selections([6],[],[],1/TIMEOUT)[0]:
+                    buffer=os.read(6,packet_length-len(packet[2::]))
+                    if buffer!='':
+                        packet+=buffer
+                    else:
+                        break
         except:
             pass
         if packet_length==0 or len(packet)<=2:
@@ -98,11 +98,12 @@ while 1:
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while packet_length!=len(packet[2::]):
-                buffer=os.read(0,packet_length-len(packet[2::]))
-                if buffer!='':
-                    packet+=buffer
-                else:
-                    break
+                if 0 in selections([0],[],[],1/TIMEOUT)[0]:
+                    buffer=os.read(0,packet_length-len(packet[2::]))
+                    if buffer!='':
+                        packet+=buffer
+                    else:
+                        break
         except:
             pass
         if packet_length==0 or len(packet)<=2:
