@@ -48,15 +48,15 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
         [ -e /service/udpmsg4.hub/config.py ] || cp hub.config.py /service/udpmsg4.hub/config.py
 
-        mkdir -p /service/udpmsg4.cache
-        cp run.cache /service/udpmsg4.cache/run
-        (
-            cd $naive
-            make
-            mv naive /service/udpmsg4.cache/naive
-            rm naive.o
-        )
-        chmod +x /service/udpmsg4.cache/run
+        #mkdir -p /service/udpmsg4.cache
+        #cp run.cache /service/udpmsg4.cache/run
+        #(
+        #    cd $naive
+        #    make
+        #    mv naive /service/udpmsg4.cache/naive
+        #    rm naive.o
+        #)
+        #chmod +x /service/udpmsg4.cache/run
 
         mkdir -p /service/udpmsg4.client
         cp run.client /service/udpmsg4.client/run

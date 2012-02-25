@@ -139,29 +139,12 @@ while 1:
 
         this_packet,this_client=hub.recvfrom(65536)
         os.write(2,'hub.py: '+PID+' received from '+this_client+'\n')
-        #sha512sum=sha512(this_packet).digest()
+        sha512sum=sha512(this_packet).digest()
 
-        #if not sha512sum in sha512cache:
-        #    if len(sha512cache)==65536:
-        #        sha512cache=sha512cache[1::]
-        #    sha512cache+=[sha512sum]
-
-        cachedb=''
-        while cachedb!='':
-            try:
-                cache.send(this_packet)
-                cachedb=0
-            except socket.error, ex:
-                if ex.errno == 11: pass
-
-        cachedb=''
-        while cachedb!='':
-            try:
-                cachedb=ord(cache.recv(1))
-            except:
-                pass
-
-        if cachedb!=1:
+        if not sha512sum in sha512cache:
+            if len(sha512cache)==65536:
+                sha512cache=sha512cache[1::]
+            sha512cache+=[sha512sum]
             kvps=udpmsg4.unframe(this_packet)
             packet_test=filter(kvps)
             if kvps!=0 and packet_test!=0:
