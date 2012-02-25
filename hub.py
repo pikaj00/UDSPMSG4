@@ -66,10 +66,6 @@ success=[]
 eagain=[]
 queue=dict()
 sha512cache=[]
-cache=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-cache.connect(('127.15.78.3',15256))
-cache.setblocking(0)
-cachefd=cache.fileno()
 while 1:
     if config.mtime!=os.path.getmtime('config.py'):
         config.mtime=os.path.getmtime('config.py')
