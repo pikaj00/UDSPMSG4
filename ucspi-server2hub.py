@@ -46,6 +46,7 @@ def filter(kvps):
                 return 0
     return kvps
 
+TIMEOUT=1
 READ_TIME=0
 WRITE_TIME=0
 CLIENT_QUEUE=[]
@@ -56,10 +57,17 @@ while 1:
         config.mtime=os.path.getmtime('config.py')
         reload(config)
 
-    TIMEOUT=1+len(CLIENT_QUEUE)+len(SERVER_QUEUE)+READ_TIME+WRITE_TIME
-    readable=selections([0,6],[],[],1/TIMEOUT)[0]
-    if WRITE_TIME!=0: WRITE_TIME-=1
-    if READ_TIME!=0: READ_TIME-=1
+    os.write(2,'ucspi-server2hub: '+CLIENT+' TIMEOUT=['+str(TIMEOUT)+'] READ_TIME=['+str(READ_TIME)+'] WRITE_TIME=['+str(WRITE_TIME)+'] CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
+    TIMEOUT=1.0/(1+len(CLIENT_QUEUE)+len(SERVER_QUEUE)+READ_TIME+WRITE_TIME)
+    readable=selections([0,6],[],[],TIMEOUT)[0]
+    if len(CLIENT_QUEUE)+len(SERVER_QUEUE)==0:
+        WRITE_TIME=0
+        READ_TIME=0
+    else:
+        if WRITE_TIME!=0:
+            WRITE_TIME-=1
+        if READ_TIME!=0:
+            READ_TIME-=1
 
     if 6 in readable:
         try:
