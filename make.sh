@@ -5,6 +5,7 @@ mkdir -p env
 mkdir -p env/servers
 touch env/this_ip
 touch env/hub_socket
+touch env/hub_sockets
 touch env/remote_sockets
 touch env/client2server
 touch env/naive
@@ -18,6 +19,10 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
     echo "[Default] `cat env/hub_socket`"
     read -p "[Enter] /path/to/hub/socket: " hub_socket
     [[ "$hub_socket" == '' ]] && hub_socket=`cat env/hub_socket`
+
+    echo "[Default] `cat env/hub_sockets`"
+    read -p "[Enter] /path/to/hub/sockets/dir: " hub_sockets
+    [[ "$hub_socket" == '' ]] && hub_sockets=`cat env/hub_sockets`
 
     echo "[Default] `cat env/remote_sockets`"
     read -p "[Enter] /remote/sockets/directory: " remote_sockets
