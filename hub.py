@@ -85,7 +85,7 @@ while 1:
     message=''
     for key in clientsocketpaths:
         if not key in queue:
-            queue[key]=collections.deque([],128)
+            queue[key]=collections.deque([],maxqueue)
             try:
                 hubsocket[key]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
                 try:
