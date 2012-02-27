@@ -73,14 +73,14 @@ while 1:
                     os.write(2,'hub.py '+PID+' error: cannot write to '+key+' '+str(ex.errno)+'\n')
                 if ex.errno == 11:
                     os.write(2,'hub.py '+PID+' error: try again extra write ('+str(len(queue[key][0]))+') to '+key+' (still '+str(len(queue[key]))+')\n')
-        if len(queue[key])<=maxqueue:
-            queue[key]=collections.deque(queue[key],maxqueue)
     if queued>0:
         timeout=1.0/queued
     else:
         timeout=1
     os.write(2,'hub.py '+PID+' poll timeout '+str(timeout)+'\n')
-    read_this=readable([hubfd],[],[],timeout)[0]
+    reads=hubsocket.values()
+    reads.append(hub);
+    read_this=readable(reads,[],[],timeout)[0]
     clientsocketpaths=os.listdir(remotesockdir)
     message=''
     for key in clientsocketpaths:
@@ -103,9 +103,9 @@ while 1:
     if len(message)>0:
         message='hub.py '+PID+' NEW ['+message+']\n'
         os.write(2,message+'\n')
-    if hubfd in read_this:
+    for readsock in read_this:
 
-        this_packet,this_client=hub.recvfrom(65536)
+        this_packet,this_client=readsock.recvfrom(65536)
         os.write(2,'hub.py '+PID+' received from '+this_client+'\n')
         sha512sum=sha512(this_packet).digest()
 
