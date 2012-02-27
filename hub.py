@@ -73,6 +73,8 @@ while 1:
                     os.write(2,'hub.py '+PID+' error: cannot write to '+key+' '+str(ex.errno)+'\n')
                 if ex.errno == 11:
                     os.write(2,'hub.py '+PID+' error: try again extra write ('+str(len(queue[key][0]))+') to '+key+' (still '+str(len(queue[key]))+')\n')
+        if len(queue[key])<=maxqueue:
+            queue[key]=collections.deque(queue[key],maxqueue)
     if queued>0:
         timeout=1.0/queued
     else:
