@@ -41,7 +41,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         mkdir -p /service/udpmsg4.cache
         cp run.cache /service/udpmsg4.cache/run
         cp cache.py /service/udpmsg4.cache/cache.py
-        [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
+        [ -L /service/udpmsg4.cache/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.cache )
 
         chmod +x /service/udpmsg4.cache/run
         chmod +x /service/udpmsg4.hub/run
