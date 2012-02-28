@@ -1,2 +1,2 @@
 #!/bin/sh -e
-exec tcpserver -H -R -l 127.15.78.3 127.15.78.3 15256 ./naive
+python cache.py `cat env/cachesocketsdir`

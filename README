@@ -4,7 +4,7 @@ and ucspi-client2server ( from cloudircd ).
 
 configure hub:
     mkdir -p /path/for/hub/socket/dir
-    mkdir -p /path/for/remote/sockets/dir
+    mkdir -p /path/for/cache/sockets/dir
     # ./make.sh and yes for make hub.
     # follow in configuration prompts.
 

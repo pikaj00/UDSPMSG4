@@ -1,140 +1,164 @@
 #!/usr/bin/env python
 import sys, os, select, collections
-from hashlib import *
-#from socket import *
+from time import time
 import socket
-readable=select.select
 
-sys.dont_write_bytecode=True
-import udpmsg4
-
-hubsock=(sys.argv[1])
-remotesockdir=sys.argv[2]
-hubsockdir=sys.argv[3]
+selections=select.select
 PID=str(os.getpid())
-os.write(2,'hub.py '+PID+' start '+remotesockdir+' '+hubsockdir+'\n')
+HUBDIR=sys.argv[1]
+HUBPATH=(sys.argv[1]+'/'+PID)
+CACHEDIR=sys.argv[2]
+CACHESOCK=sys.argv[2]+'/cache'
+CACHEPATH=(sys.argv[2]+'/'+PID)
+CLIENT='CLIENT=['+str(os.getpid())+'@'+os.getenv('TCPREMOTEIP')+':'+os.getenv('TCPREMOTEPORT')+']'
 hub=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+cache=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 try:
-    hub.bind(hubsock)
+    os.remove(HUBPATH)
 except:
-    os.remove(hubsock)
-    hub.bind(hubsock)
+    pass
+
+try:
+    os.remove(CACHEPATH)
+except:
+    pass
+
 hub.setblocking(0)
-hubfd=hub.fileno()
+hub.bind(HUBPATH)
+HUBFD=hub.fileno()
 
-success=[]
-eagain=[]
-queue=dict()
-hubsocket=dict()
-sha512cache=[]
+cache.setblocking(0)
+cache.bind(CACHEPATH)
+CACHEFD=cache.fileno()
+
+TIMEOUT=1
+READ_TIME=0
+WRITE_TIME=0
+CLIENT_QUEUE=[]
+SOCKET_QUEUE={}
+REMOTE_QUEUE='[]'
 while 1:
-    maxqueue=128*len(os.listdir(remotesockdir))
-    message=''
-    message+='hub.py: '+PID+' SUCCESS ['
-    for this_socket in success:
-        message+=this_socket+','
-    message+=']'
-    success=[]
-    message+=' EAGAIN ['
-    for this_socket in eagain:
-        message+=this_socket+','
-    message+=']'
-    eagain=[]
-    message+=' MAXQUEUE ['+str(maxqueue)+'] QUEUE ['
-    for key in queue.keys():
-        message+=os.path.basename(key)+'='+str(len(queue[key]))
-        if not key in clientsocketpaths:
-            del queue[key]
-            del hubsocket[key]
-            os.remove(hubsockdir+'/'+key)
-            message+='D'
-        message+=','
-    message+=']\n'
-    os.write(2,message+'\n')
-    queued=0
-    for key in queue.keys():
-        if len(queue[key])>0:
-            queued+=1
-            try:
-                write_length=hubsocket[key].sendto(queue[key][0],remotesockdir+'/'+key)
-                if write_length!=len(queue[key][0]):
-                    os.write(2,'hub.py '+PID+' error: write_length == '+str(write_length)+', packet_length == '+str(len(queue[key][0]))+'\n')
-                queue[key].popleft()
-                os.write(2,'hub.py '+PID+' extra send success '+key+' (still '+str(len(queue[key]))+')\n')
-                queued+=100
-            except socket.error, ex:
-                if ex.errno == 111:
-                    os.write(2,'hub.py '+PID+' socket dead '+key+'('+str(len(queue[key]))+')\n')
-                    try:
-                        os.remove(remotesockdir+'/'+key)
-                    except:
-                        pass
-                if ex.errno != 11:
-                    os.write(2,'hub.py '+PID+' error: cannot write to '+key+' '+str(ex.errno)+'\n')
-                if ex.errno == 11:
-                    os.write(2,'hub.py '+PID+' error: try again extra write ('+str(len(queue[key][0]))+') to '+key+' (still '+str(len(queue[key]))+')\n')
-        if len(queue[key])<=maxqueue:
-            queue[key]=collections.deque(queue[key],maxqueue)
-    if queued>0:
-        timeout=1.0/queued
-    else:
-        timeout=1
-    os.write(2,'hub.py '+PID+' poll timeout '+str(timeout)+'\n')
-    reads=hubsocket.values()
-    reads.append(hub);
-    read_this=readable(reads,[],[],timeout)[0]
-    clientsocketpaths=os.listdir(remotesockdir)
-    message=''
-    for key in clientsocketpaths:
-        if not key in queue:
-            queue[key]=collections.deque([],maxqueue)
-            try:
-                hubsocket[key]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
-                try:
-                    os.remove(hubsockdir+'/'+key)
-                except:
-                    pass
-                hubsocket[key].bind(hubsockdir+'/'+key)
-                hubsocket[key].setblocking(0)
-            except:
-                del hubsocket[key]
-                del queue[key]
-                clientsocketpaths.remove(key)
-                message+='FAIL:'
-            message+=os.path.basename(key)+','
-    if len(message)>0:
-        message='hub.py '+PID+' NEW ['+message+']\n'
-        os.write(2,message+'\n')
-    for readsock in read_this:
+    TIME=time()
+    TIMEOUT=1.0/(1+LOOP_TIME)
+    REMOTE_SOCKS=os.listdir(HUBDIR)
+    MAX_QUEUE=128*len(os.listdir(HUBDIR))
+    os.write(2,'hub.py: '+CLIENT+' MAX_QUEUE=['+str(MAX_QUEUE)+'] REMOTE_QUEUE='+REMOTE_QUEUE+' TIMEOUT=['+str(TIMEOUT)+'] LOOP_TIME=['+str(LOOP_TIME)+']\n')
+    readable=selections([0,HUBFD],[],[],TIMEOUT)[0]
 
-        this_packet,this_client=readsock.recvfrom(65536)
-        os.write(2,'hub.py '+PID+' received from '+this_client+'\n')
-        sha512sum=sha512(this_packet).digest()
+    if HUBFD in readable:
+        try:
+            READ_TIME+=1
+            packet_length=0
+            packet,REMOTE=hub.recvfrom(65536)
+            packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
+        except:
+            pass
+        if packet_length==0 or len(packet)<=2:
+            os.write(2,'hub.py: '+CLIENT+' connection to '+REMOTE[len(HUBDIR)+1::]+' died\n')
+        elif packet_length!=len(packet[2::]):
+            os.write(2,'hub.py: '+CLIENT+' rejected protocol error from '+REMOTE[len(HUBDIR)+1::]+'\n')
+        else:
+            cache.sendto(packet,CACHESOCK)
+            while 1:
+                if len(selections([CACHEFD],[],[],TIMEOUT)[0])==1:
+                    if cache.recv(1)=='\x00':
+                        CLIENT_QUEUE+=[packet]
+                        os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+1::]+'\n')
+                    if len(CLIENT_QUEUE)<=MAX_QUEUE:
+                        CLIENT_QUEUE=collections.deque(CLIENT_QUEUE,MAX_QUEUE)
+                    break
 
-        if not sha512sum in sha512cache:
-            if len(sha512cache)==65536:
-                sha512cache=sha512cache[1::]
-            sha512cache+=[sha512sum]
-            packet_length=len(this_packet)
-            for this_socket in clientsocketpaths:
-                if remotesockdir+'/'+this_socket!=this_client:
-                    if len(queue[this_socket])==0:
-                        try:
-                            write_length=hubsocket[this_socket].sendto(this_packet,remotesockdir+'/'+this_socket)
-                            if write_length!=packet_length:
-                                os.write(2,'hub.py '+PID+' error: write_length == '+str(write_length)+', packet_length == '+str(packet_length)+'\n')
-                            os.write(2,'hub.py '+PID+' success: can write to '+this_socket+'\n')
-                            success+=[this_socket]
-                        except socket.error, ex:
-                            if ex.errno == 111:
-                                os.write(2,'hub.py '+PID+' socket dead '+remotesockdir+'/'+this_socket+'\n')
-                                os.remove(remotesockdir+'/'+this_socket)
-                            if ex.errno != 11:
-                                os.write(2,'hub.py '+PID+' error: cannot write to '+remotesockdir+'/'+this_socket+' '+str(ex.errno)+'\n')
-                            if ex.errno == 11:
-                                eagain+=[this_socket]
-                                queue[this_socket].append(this_packet)
+    if 0 in readable:
+        try:
+            packet=''
+            packet_length=0
+            packet=os.read(0,2)
+            packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
+            while packet_length!=len(packet[2::]):
+                if 0 in selections([0],[],[],TIMEOUT)[0]:
+                    buffer=os.read(0,packet_length-len(packet[2::]))
+                    if buffer!='':
+                        packet+=buffer
                     else:
-                        queue[this_socket].append(this_packet)
-                else:
-                    os.write(2,'hub.py '+PID+' received from '+this_socket+'\n')
+                        break
+        except:
+            pass
+        if packet_length==0 or len(packet)<=2:
+            os.write(2,'hub.py: '+CLIENT+' connection to client died\n')
+            os.remove(HUBPATH)
+            os.remove(CACHEPATH)
+            break
+        elif packet_length!=len(packet[2::]):
+            os.write(2,'hub.py: '+CLIENT+' fatal protocol error from client\n')
+            os.remove(HUBPATH)
+            os.remove(CACHEPATH)
+            break
+        else:
+            cache.sendto(packet,CACHEPATH)
+            while 1:
+                if len(selections([CACHEFD],[],[],TIMEOUT)[0])==1:
+                    if cache.recv(1)=='\x00':
+                        os.write(2,'hub.py: '+CLIENT+' successful read from client\n')
+                        for REMOTE in REMOTE_SOCKS:
+                            if not HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
+                                SOCKET_QUEUE[HUBDIR+'/'+REMOTE]=collections.deque([],MAX_QUEUE)
+                            if HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
+                                SOCKET_QUEUE[HUBDIR+'/'+REMOTE]+=[packet]
+                    break
+
+    while len(CLIENT_QUEUE)!=0:
+        write_length=0
+        packet=CLIENT_QUEUE[0]
+        packet_length=len(packet)
+        while packet_length!=write_length:
+            try:
+                write_length=os.write(1,packet[write_length::])
+            except:
+                break
+        if packet_length==write_length:
+            WRITE_TIME+=1
+            CLIENT_QUEUE.popleft()
+            os.write(2,'hub.py: '+CLIENT+' successful write to client\n')
+        elif write_length>0:
+            CLIENT_QUEUE[0]=packet[write_length::]
+            os.write(2,'hub.py: '+CLIENT+' could not write complete packet to client\n')
+            break
+        elif write_length==0:
+            os.write(2,'hub.py: '+CLIENT+' failed to write to client\n')
+            break
+
+    if SOCKET_QUEUE!={}:
+        DEQUE=[]
+        REMOTE_QUEUE=''
+        for REMOTE in SOCKET_QUEUE:
+            DEQUE+=[REMOTE]
+            if REMOTE!=HUBPATH:
+                while len(SOCKET_QUEUE[REMOTE])!=0:
+                    write_length=0
+                    packet=SOCKET_QUEUE[REMOTE][0]
+                    packet_length=len(packet)
+                    while packet_length!=write_length:
+                        try:
+                            write_length=hub.sendto(packet[write_length::],REMOTE)
+                        except:
+                            break
+                    if packet_length==write_length:
+                        SOCKET_QUEUE[REMOTE].popleft()
+                        os.write(2,'hub.py: '+CLIENT+' successful write to '+REMOTE[len(HUBDIR)+1::]+'\n')
+                    elif write_length>0:
+                        SOCKET_QUEUE[REMOTE][0]=packet[write_length::]
+                        os.write(2,'hub.py: '+CLIENT+' could not write complete packet to '+REMOTE[len(HUBDIR)+1::]+'\n')
+                        break
+                    elif write_length==0:
+                        os.write(2,'hub.py: '+CLIENT+' failed to write to '+REMOTE[len(HUBDIR)+1::]+'\n')
+                        break
+                if len(SOCKET_QUEUE[REMOTE])<=MAX_QUEUE:
+                    SOCKET_QUEUE[REMOTE]=collections.deque(SOCKET_QUEUE[REMOTE],MAX_QUEUE)
+                REMOTE_QUEUE+=REMOTE[len(HUBDIR)+1::]+'='+str(len(SOCKET_QUEUE[REMOTE]))+', '
+        REMOTE_QUEUE='['+REMOTE_QUEUE[:len(REMOTE_QUEUE)-2:]+']'
+        for REMOTE in DEQUE:
+            if not os.path.exists(REMOTE):
+                del SOCKET_QUEUE[REMOTE]
+    else:
+        REMOTE_QUEUE='[]'
+    LOOP_TIME=time()-TIME

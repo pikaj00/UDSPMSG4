@@ -3,71 +3,48 @@
 this_dir=`pwd`
 mkdir -p env
 mkdir -p env/servers
-touch env/this_ip
-touch env/hub_socket
-touch env/hub_sockets
-touch env/remote_sockets
+touch env/hubip
+touch env/hubsocketsdir
+touch env/clientsocketsdir
 touch env/client2server
-touch env/naive
 
 read -p "[Y/N] make hub?: " qna
 if [[ "${qna//y/Y}" == *Y* ]]; then
-    echo "[Default] `cat env/this_ip`"
-    read -p "[Enter] this ip: " this_ip
-    [[ "$this_ip" == '' ]] && this_ip=`cat env/this_ip`
+    echo "[Default] `cat env/hubip`"
+    read -p "[Enter] hub ip: " hubip
+    [[ "$hubip" == '' ]] && hubip=`cat env/hubip`
 
-    echo "[Default] `cat env/hub_socket`"
-    read -p "[Enter] /path/to/hub/socket: " hub_socket
-    [[ "$hub_socket" == '' ]] && hub_socket=`cat env/hub_socket`
+    echo "[Default] `cat env/hubsockets`"
+    read -p "[Enter] /path/to/hub/sockets/directory: " hubsocketsdir
+    [[ "$hubsocketsdir" == '' ]] && hubsocketsdir=`cat env/hubsocketsdir`
 
-    echo "[Default] `cat env/hub_sockets`"
-    read -p "[Enter] /path/to/hub/sockets/dir: " hub_sockets
-    [[ "$hub_socket" == '' ]] && hub_sockets=`cat env/hub_sockets`
-
-    echo "[Default] `cat env/remote_sockets`"
-    read -p "[Enter] /remote/sockets/directory: " remote_sockets
-    [[ "$remote_sockets" == '' ]] && remote_sockets=`cat env/remote_sockets`
-
-    echo "[Default] `cat env/naive`"
-    read -p "[Enter] /path/to/hubtools/hashcache: " naive
-    [[ "$naive" == '' ]] && naive=`cat env/naive`
+    echo "[Default] `cat env/cachesocketsdir`"
+    read -p "[Enter] /path/to/cache/sockets/directory: " cachesocketsdir
+    [[ "$cachesocketsdir" == '' ]] && cachesocketsdir=`cat env/cachesocketsdir`
 
     echo "[Proposed configuration]
-        this ip: $this_ip
-        /path/to/hub/socket: $hub_socket
-        /remote/sockets/directory: $remote_sockets
-        /path/to/hubtools/hashcache: $naive"
+        hub ip: $hubip
+        /path/to/hub/sockets/directory: $hubsocketsdir
+        /path/to/cache/sockets/directory: $cachesocketsdir"
 
     read -p "[Y/N] use this configuration?: " qna
     if [[ "${qna//y/Y}" == *Y* ]]; then
-        echo -n $this_ip>env/this_ip
-        echo -n $hub_socket>env/hub_socket
-        echo -n $remote_sockets>env/remote_sockets
-        echo -n $naive>env/naive
+        echo -n $hubip>env/hubip
+        echo -n $hubsocketsdir>env/hubsocketsdir
+        echo -n $cachesocketsdir>env/cachesocketsdir
 
         mkdir -p /service/udpmsg4.hub
         cp run.hub /service/udpmsg4.hub/run
         cp hub.py /service/udpmsg4.hub/hub.py
-        cp udpmsg4.py /service/udpmsg4.hub/udpmsg4.py
-        chmod +x /service/udpmsg4.hub/run
         [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
-        [ -e /service/udpmsg4.hub/config.py ] || cp hub.config.py /service/udpmsg4.hub/config.py
 
-        #mkdir -p /service/udpmsg4.cache
-        #cp run.cache /service/udpmsg4.cache/run
-        #(
-        #    cd $naive
-        #    make
-        #    mv naive /service/udpmsg4.cache/naive
-        #    rm naive.o
-        #)
-        #chmod +x /service/udpmsg4.cache/run
+        mkdir -p /service/udpmsg4.cache
+        cp run.cache /service/udpmsg4.cache/run
+        cp cache.py /service/udpmsg4.cache/cache.py
+        [ -L /service/udpmsg4.hub/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.hub )
 
-        mkdir -p /service/udpmsg4.client
-        cp run.client /service/udpmsg4.client/run
-        cp stream.py /service/udpmsg4.client/stream.py
-        chmod +x /service/udpmsg4.client/run
-        [ -L /service/udpmsg4.client/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.client )
+        chmod +x /service/udpmsg4.cache/run
+        chmod +x /service/udpmsg4.hub/run
     fi
 fi
 
@@ -87,11 +64,11 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         for this_peer in `ls peers` ; do
             mkdir -p /service/udpmsg4.$this_peer
             cp run.peer /service/udpmsg4.$this_peer/run
-            cp stream.py /service/udpmsg4.$this_peer/stream.py
-            chmod +x /service/udpmsg4.$this_peer/run
+            cp hub.py /service/udpmsg4.$this_peer/hub.py
             [ -L /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
             [ -L /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
             [ -L /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
+            chmod +x /service/udpmsg4.$this_peer/run
         done
     fi
 fi

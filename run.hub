@@ -1,2 +1,2 @@
 #!/bin/sh -e
-exec python hub.py `cat env/hub_socket` `cat env/remote_sockets` `cat env/hub_sockets`
+exec tcpserver -H -R -l `cat env/hubip` `cat env/hubip` 15783 python hub.py `cat env/hubsocketsdir` `cat env/cachesocketsdir`
