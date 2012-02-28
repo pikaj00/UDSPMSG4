@@ -58,20 +58,10 @@ while 1:
         elif packet_length!=len(packet[2::]):
             os.write(2,'hub.py: '+CLIENT+' rejected protocol error from '+REMOTE[len(HUBDIR)+1::]+'\n')
         else:
-            write_length=0
-            while write_length!=len(packet):
-                try:
-                    write_length=cache.sendto(packet,CACHESOCK)
-                except:
-                    pass
-            while 1:
-                if len(selections([CACHEFD],[],[],TIMEOUT)[0])==1:
-                    if cache.recv(1)=='\x00':
-                        CLIENT_QUEUE+=[packet]
-                        os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+1::]+'\n')
-                    if len(CLIENT_QUEUE)<=MAX_QUEUE:
-                        CLIENT_QUEUE=collections.deque(CLIENT_QUEUE,MAX_QUEUE)
-                    break
+            CLIENT_QUEUE+=[packet]
+            os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+1::]+'\n')
+            if len(CLIENT_QUEUE)<=MAX_QUEUE:
+                CLIENT_QUEUE=collections.deque(CLIENT_QUEUE,MAX_QUEUE)
 
     if 0 in readable:
         try:
@@ -99,12 +89,26 @@ while 1:
             os.remove(CACHEPATH)
             break
         else:
-            os.write(2,'hub.py: '+CLIENT+' successful read from client\n')
-            for REMOTE in REMOTE_SOCKS:
-                if not HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
-                    SOCKET_QUEUE[HUBDIR+'/'+REMOTE]=collections.deque([],MAX_QUEUE)
-                if HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
-                    SOCKET_QUEUE[HUBDIR+'/'+REMOTE]+=[packet]
+            write_length=0
+            while write_length!=len(packet):
+                try:
+                    write_length=cache.sendto(packet,CACHESOCK)
+                except:
+                    pass
+            cache_query=''
+            while len(cache_query)!=1:
+                if len(selections([0],[],[],TIMEOUT)[0])==1:
+                    try:
+                        cache_query=cache.recv(1)
+                    except:
+                        pass
+            if cache_query=='\x00':
+                os.write(2,'hub.py: '+CLIENT+' successful read from client\n')
+                for REMOTE in REMOTE_SOCKS:
+                    if not HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
+                        SOCKET_QUEUE[HUBDIR+'/'+REMOTE]=collections.deque([],MAX_QUEUE)
+                    if HUBDIR+'/'+REMOTE in SOCKET_QUEUE and REMOTE!=PID:
+                        SOCKET_QUEUE[HUBDIR+'/'+REMOTE]+=[packet]
 
     while len(CLIENT_QUEUE)!=0:
         write_length=0
