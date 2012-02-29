@@ -135,8 +135,9 @@ while 1:
         DEQUE=[]
         REMOTE_QUEUE=''
         for REMOTE in SOCKET_QUEUE:
-            DEQUE+=[REMOTE]
-            if REMOTE!=HUBPATH:
+            if os.path.exists(REMOTE)==False:
+                DEQUE+=[REMOTE]
+            else:
                 while len(SOCKET_QUEUE[REMOTE])!=0:
                     write_length=0
                     packet=SOCKET_QUEUE[REMOTE][0]
@@ -160,8 +161,8 @@ while 1:
                     SOCKET_QUEUE[REMOTE]=collections.deque(SOCKET_QUEUE[REMOTE],MAX_QUEUE)
                 REMOTE_QUEUE+=REMOTE[len(HUBDIR)+1::]+'='+str(len(SOCKET_QUEUE[REMOTE]))+', '
         REMOTE_QUEUE='['+REMOTE_QUEUE[:len(REMOTE_QUEUE)-2:]+']'
-        for REMOTE in DEQUE:
-            if not os.path.exists(REMOTE):
+        if len(DEQUE)!=0:
+            for REMOTE in DEQUE:
                 del SOCKET_QUEUE[REMOTE]
     else:
         REMOTE_QUEUE='[]'
