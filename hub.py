@@ -52,12 +52,12 @@ while 1:
         except:
             pass
         if packet_length==0 or len(packet)<=2:
-            os.write(2,'hub.py: '+CLIENT+' connection to '+REMOTE[len(HUBDIR)+6::]+' died\n')
+            os.write(2,'hub.py: '+CLIENT+' connection to '+REMOTE[len(HUBDIR)+6::].split('to')[0]+' died\n')
         elif packet_length!=len(packet[2::]):
-            os.write(2,'hub.py: '+CLIENT+' rejected protocol error from '+REMOTE[len(HUBDIR)+6::]+'\n')
+            os.write(2,'hub.py: '+CLIENT+' rejected protocol error from '+REMOTE[len(HUBDIR)+6::].split('to')[0]+'\n')
         else:
             CLIENT_QUEUE+=[packet]
-            os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+6::]+'\n')
+            os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+6::].split('to')[0]+'\n')
             if len(CLIENT_QUEUE)<=MAX_QUEUE:
                 CLIENT_QUEUE=collections.deque(CLIENT_QUEUE,MAX_QUEUE)
 
