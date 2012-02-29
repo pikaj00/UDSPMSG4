@@ -33,6 +33,11 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         echo -n $hubsocketsdir>env/hubsocketsdir
         echo -n $cachesocketsdir>env/cachesocketsdir
 
+        mkdir -p $hubsocketsdir
+        mkdir -p $hubsocketsdir/send
+        mkdir -p $hubsocketsdir/recv
+        mkdir -p $cachesocketsdir
+
         mkdir -p /service/udpmsg4.hub
         cp run.hub /service/udpmsg4.hub/run
         cp hub.py /service/udpmsg4.hub/hub.py
