@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import sys, os, select, collections
+import sys, os, select, collections, time
 CLIENT='['+str(os.getpid())+'@'+os.getenv('TCPREMOTEIP')+':'+os.getenv('TCPREMOTEPORT')+']'
 from hashlib import sha512
 selections=select.select
@@ -47,8 +47,7 @@ def filter(kvps):
     return kvps
 
 TIMEOUT=1
-READ_TIME=0
-WRITE_TIME=0
+LOOP_TIME=0
 CLIENT_QUEUE=[]
 SERVER_QUEUE=[]
 SHA512_CACHE=collections.deque([],4096)
@@ -57,17 +56,10 @@ while 1:
         config.mtime=os.path.getmtime('config.py')
         reload(config)
 
-    os.write(2,'ucspi-server2hub: '+CLIENT+' TIMEOUT=['+str(TIMEOUT)+'] READ_TIME=['+str(READ_TIME)+'] WRITE_TIME=['+str(WRITE_TIME)+'] CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
-    TIMEOUT=1.0/(1+len(CLIENT_QUEUE)+len(SERVER_QUEUE)+READ_TIME+WRITE_TIME)
+    TIME=time.time()
+    TIMEOUT=1.0/(1+LOOP_TIME)
+    os.write(2,'ucspi-server2hub: '+CLIENT+' TIMEOUT=['+str(TIMEOUT)+'] CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
     readable=selections([0,6],[],[],TIMEOUT)[0]
-    if len(CLIENT_QUEUE)+len(SERVER_QUEUE)==0:
-        WRITE_TIME=0
-        READ_TIME=0
-    else:
-        if WRITE_TIME!=0:
-            WRITE_TIME-=1
-        if READ_TIME!=0:
-            READ_TIME-=1
 
     if 6 in readable:
         try:
@@ -76,8 +68,7 @@ while 1:
             packet=os.read(6,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while packet_length!=len(packet[2::]):
-                READ_TIME+=1
-                if 6 in selections([6],[],[],READ_TIME)[0]:
+                if 6 in selections([6],[],[],TIMEOUT)[0]:
                     buffer=os.read(6,packet_length-len(packet[2::]))
                     if buffer!='':
                         packet+=buffer
@@ -107,8 +98,7 @@ while 1:
             packet=os.read(0,2)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
             while packet_length!=len(packet[2::]):
-                READ_TIME+=1
-                if 0 in selections([0],[],[],READ_TIME)[0]:
+                if 0 in selections([0],[],[],TIMEOUT)[0]:
                     buffer=os.read(0,packet_length-len(packet[2::]))
                     if buffer!='':
                         packet+=buffer
@@ -141,7 +131,6 @@ while 1:
             except:
                 break
         if packet_length==write_length:
-            WRITE_TIME+=1
             CLIENT_QUEUE=CLIENT_QUEUE[1::]
             os.write(2,'ucspi-server2hub: '+CLIENT+' successful write to client\n')
             os.write(2,'ucspi-server2hub: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
@@ -165,7 +154,6 @@ while 1:
             except:
                 break
         if packet_length==write_length:
-            WRITE_TIME+=1
             SERVER_QUEUE=SERVER_QUEUE[1::]
             os.write(2,'ucspi-server2hub: '+CLIENT+' successful write to server\n')
             os.write(2,'ucspi-server2hub: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
@@ -178,3 +166,4 @@ while 1:
             os.write(2,'ucspi-server2hub: '+CLIENT+' failed to write to server\n')
             os.write(2,'ucspi-server2hub: '+CLIENT+' CLIENT_QUEUE=['+str(len(CLIENT_QUEUE))+'] SERVER_QUEUE=['+str(len(SERVER_QUEUE))+']\n')
             break
+    LOOP_TIME=time.time()-TIME
