@@ -32,8 +32,6 @@ cache.bind(CACHEPATH)
 CACHEFD=cache.fileno()
 
 LOOP_TIME=0
-READ_TIME=0
-WRITE_TIME=0
 CLIENT_QUEUE=[]
 SOCKET_QUEUE={}
 REMOTE_QUEUE='[]'
@@ -47,7 +45,6 @@ while 1:
 
     if HUBFD in readable:
         try:
-            READ_TIME+=1
             packet_length=0
             packet,REMOTE=hub.recvfrom(65536)
             packet_length=(ord(packet[:1:])*256)+ord(packet[1:2:])
@@ -120,7 +117,6 @@ while 1:
             except:
                 break
         if packet_length==write_length:
-            WRITE_TIME+=1
             CLIENT_QUEUE.popleft()
             os.write(2,'hub.py: '+CLIENT+' successful write to client\n')
         elif write_length>0:
