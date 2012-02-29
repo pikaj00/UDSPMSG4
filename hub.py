@@ -114,6 +114,7 @@ while 1:
                     if not REMOTE in SOCKET_QUEUE and REMOTE!=PID:
                         SOCKET_QUEUE[REMOTE]=collections.deque([],MAX_QUEUE)
                         MULTISOCKETS[REMOTE]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+                        MULTISOCKETS[REMOTE].setblocking(0)
                         try:
                             os.remove(HUBDIR+'/send/'+PID+'to'+REMOTE)
                         except:
