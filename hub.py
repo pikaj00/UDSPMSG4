@@ -52,12 +52,12 @@ while 1:
         except:
             pass
         if packet_length==0 or len(packet)<=2:
-            os.write(2,'hub.py: '+CLIENT+' connection to server died\n')
+            os.write(2,'hub.py: '+CLIENT+' connection to '+REMOTE[len(HUBDIR)+6::]+' died\n')
         elif packet_length!=len(packet[2::]):
-            os.write(2,'hub.py: '+CLIENT+' rejected protocol error from server\n')
+            os.write(2,'hub.py: '+CLIENT+' rejected protocol error from '+REMOTE[len(HUBDIR)+6::]+'\n')
         else:
             CLIENT_QUEUE+=[packet]
-            os.write(2,'hub.py: '+CLIENT+' successful read from server\n')
+            os.write(2,'hub.py: '+CLIENT+' successful read from '+REMOTE[len(HUBDIR)+6::]+'\n')
             if len(CLIENT_QUEUE)<=MAX_QUEUE:
                 CLIENT_QUEUE=collections.deque(CLIENT_QUEUE,MAX_QUEUE)
 
@@ -161,13 +161,13 @@ while 1:
                             break
                     if packet_length==write_length:
                         SOCKET_QUEUE[REMOTE].popleft()
-                        os.write(2,'hub.py: '+CLIENT+' successful write to server\n')
+                        os.write(2,'hub.py: '+CLIENT+' successful write to '+str(REMOTE)+'\n')
                     elif write_length>0:
                         SOCKET_QUEUE[REMOTE][0]=packet[write_length::]
-                        os.write(2,'hub.py: '+CLIENT+' could not write complete packet to server\n')
+                        os.write(2,'hub.py: '+CLIENT+' could not write complete packet to '+str(REMOTE)+'\n')
                         break
                     elif write_length==0:
-                        os.write(2,'hub.py: '+CLIENT+' failed to write to server\n')
+                        os.write(2,'hub.py: '+CLIENT+' failed to write to '+str(REMOTE)+'\n')
                         break
                 if len(SOCKET_QUEUE[REMOTE])<=MAX_QUEUE:
                     SOCKET_QUEUE[REMOTE]=collections.deque(SOCKET_QUEUE[REMOTE],MAX_QUEUE)
