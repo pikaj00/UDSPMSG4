@@ -10,13 +10,12 @@ CACHEDIR=sys.argv[2]
 CACHESOCK=sys.argv[2]+'/cache'
 CACHEPATH=(sys.argv[2]+'/'+PID)
 CLIENT='CLIENT=['+str(os.getpid())+'@'+os.getenv('TCPREMOTEIP')+':'+os.getenv('TCPREMOTEPORT')+']'
-hub=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 cache=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 try:
     os.remove(HUBDIR+'/pid/'+PID)
 except:
     pass
-hub.bind((HUBDIR+'/pid/'+PID))
+file(HUBDIR+'/pid/'+PID,'w')
 
 try:
     os.remove(CACHEPATH)
@@ -41,13 +40,17 @@ while 1:
         if SOCKET!=PID:
             REMOTE_SOCKS+=[SOCKET]
             if not SOCKET in RECVSOCKETS:
-                RECVSOCKETS[SOCKET]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
-                RECVSOCKETS[SOCKET].setblocking(0)
                 try:
-                    os.remove(HUBDIR+'/recv/'+PID+'FROM'+SOCKET)
-                except:
-                    pass
-                RECVSOCKETS[SOCKET].bind((HUBDIR+'/recv/'+PID+'FROM'+SOCKET))
+                    RECVSOCKETS[SOCKET]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+                    RECVSOCKETS[SOCKET].setblocking(0)
+                    try:
+                        os.remove(HUBDIR+'/recv/'+PID+'FROM'+SOCKET)
+                    except:
+                        pass
+                    RECVSOCKETS[SOCKET].bind((HUBDIR+'/recv/'+PID+'FROM'+SOCKET))
+                except socket.error, ex:
+                    if ex.errno == 24:
+                        os.write(2,'hub.py: '+CLIENT+' failed to create recvsocket for '+REMOTE+'\n')
     MAX_QUEUE=128*(len(REMOTE_SOCKS)+1)
     os.write(2,'hub.py: '+CLIENT+' MAX_QUEUE=['+str(MAX_QUEUE)+'] TIMEOUT=['+str(TIMEOUT)+'] REMOTE_QUEUE='+REMOTE_QUEUE+'\n')
 
@@ -110,15 +113,19 @@ while 1:
                 os.write(2,'hub.py: '+CLIENT+' successful read from client\n')
                 for REMOTE in REMOTE_SOCKS:
                     if not REMOTE in SOCKET_QUEUE:
-                        SOCKET_QUEUE[REMOTE]=collections.deque([],MAX_QUEUE)
-                        SENDSOCKETS[REMOTE]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
-                        SENDSOCKETS[REMOTE].setblocking(0)
                         try:
-                            os.remove(HUBDIR+'/send/'+PID+'TO'+REMOTE)
-                        except:
-                            pass
-                        SENDSOCKETS[REMOTE].bind((HUBDIR+'/send/'+PID+'TO'+REMOTE))
-                    if REMOTE in SOCKET_QUEUE and REMOTE!=PID:
+                            SENDSOCKETS[REMOTE]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+                            SENDSOCKETS[REMOTE].setblocking(0)
+                            try:
+                                os.remove(HUBDIR+'/send/'+PID+'TO'+REMOTE)
+                            except:
+                                pass
+                            SENDSOCKETS[REMOTE].bind((HUBDIR+'/send/'+PID+'TO'+REMOTE))
+                            SOCKET_QUEUE[REMOTE]=collections.deque([],MAX_QUEUE)
+                        except socket.error, ex:
+                            if ex.errno == 24:
+                                os.write(2,'hub.py: '+CLIENT+' failed to create sendsocket for '+REMOTE+'\n')
+                    if REMOTE in SOCKET_QUEUE:
                         SOCKET_QUEUE[REMOTE]+=[packet]
 
     for SOCKET in RECVSOCKETS:
