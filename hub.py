@@ -195,9 +195,12 @@ while 1:
             os.remove(HUBDIR+'/send/'+PID+'TO'+REMOTE)
             SENDSOCKETS[REMOTE].close()
             del SENDSOCKETS[REMOTE]
-            os.remove(HUBDIR+'/recv/'+PID+'FROM'+REMOTE)
-            RECVSOCKETS[REMOTE].close()
-            del RECVSOCKETS[REMOTE]
+            try:
+                os.remove(HUBDIR+'/recv/'+PID+'FROM'+REMOTE)
+                RECVSOCKETS[REMOTE].close()
+                del RECVSOCKETS[REMOTE]
+            except:
+                pass
     else:
         REMOTE_QUEUE='[]'
     LOOP_TIME=time()-TIME
