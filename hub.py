@@ -32,11 +32,11 @@ CLIENT_QUEUE=[]
 SOCKET_QUEUE={}
 SENDSOCKETS={}
 RECVSOCKETS={}
-REMOTE_SOCKS=[]
 REMOTE_QUEUE='[]'
 while 1:
     TIME=time()
     TIMEOUT=1.0/(1+LOOP_TIME)
+    REMOTE_SOCKS=[]
     for SOCKET in os.listdir(HUBDIR+'/pid/'):
         if SOCKET!=PID:
             REMOTE_SOCKS+=[SOCKET]
@@ -48,7 +48,6 @@ while 1:
                 except:
                     pass
                 RECVSOCKETS[SOCKET].bind((HUBDIR+'/recv/'+PID+'FROM'+SOCKET))
-    REMOTE_SOCKS=list(set(REMOTE_SOCKS))
     MAX_QUEUE=128*(len(REMOTE_SOCKS)+1)
     os.write(2,'hub.py: '+CLIENT+' MAX_QUEUE=['+str(MAX_QUEUE)+'] TIMEOUT=['+str(TIMEOUT)+'] REMOTE_QUEUE='+REMOTE_QUEUE+'\n')
 
