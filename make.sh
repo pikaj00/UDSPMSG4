@@ -34,6 +34,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         echo -n $cachesocketsdir>env/cachesocketsdir
 
         mkdir -p $hubsocketsdir
+        mkdir -p $hubsocketsdir/pid
         mkdir -p $hubsocketsdir/send
         mkdir -p $hubsocketsdir/recv
         mkdir -p $cachesocketsdir
