@@ -36,21 +36,25 @@ while 1:
     TIME=time()
     TIMEOUT=1.0/(1+LOOP_TIME)
     REMOTE_SOCKS=[]
-    for SOCKET in os.listdir(HUBDIR+'/pid/'):
-        if SOCKET!=PID:
-            REMOTE_SOCKS+=[SOCKET]
-            if not SOCKET in RECVSOCKETS:
-                try:
-                    RECVSOCKETS[SOCKET]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
-                    RECVSOCKETS[SOCKET].setblocking(0)
+    try:
+        for SOCKET in os.listdir(HUBDIR+'/pid/'):
+            if SOCKET!=PID:
+                REMOTE_SOCKS+=[SOCKET]
+                if not SOCKET in RECVSOCKETS:
                     try:
-                        os.remove(HUBDIR+'/recv/'+PID+'FROM'+SOCKET)
-                    except:
-                        pass
-                    RECVSOCKETS[SOCKET].bind((HUBDIR+'/recv/'+PID+'FROM'+SOCKET))
-                except socket.error, ex:
-                    if ex.errno == 24:
-                        os.write(2,'hub.py: '+CLIENT+' failed to create recvsocket for '+REMOTE+'\n')
+                        RECVSOCKETS[SOCKET]=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+                        RECVSOCKETS[SOCKET].setblocking(0)
+                        try:
+                            os.remove(HUBDIR+'/recv/'+PID+'FROM'+SOCKET)
+                        except:
+                            pass
+                        RECVSOCKETS[SOCKET].bind((HUBDIR+'/recv/'+PID+'FROM'+SOCKET))
+                    except socket.error, ex:
+                        if ex.errno == 24:
+                            os.write(2,'hub.py: '+CLIENT+' failed to create recvsocket for '+REMOTE+'\n')
+    except socket.error, ex:
+        if ex.errno == 24:
+            os.write(2,'hub.py: '+CLIENT+' failed to read pids\n') 
     MAX_QUEUE=128*(len(REMOTE_SOCKS)+1)
     os.write(2,'hub.py: '+CLIENT+' MAX_QUEUE=['+str(MAX_QUEUE)+'] TIMEOUT=['+str(TIMEOUT)+'] REMOTE_QUEUE='+REMOTE_QUEUE+'\n')
 
