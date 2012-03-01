@@ -122,7 +122,7 @@ while 1:
                         SOCKET_QUEUE[REMOTE]+=[packet]
 
     for SOCKET in RECVSOCKETS:
-        if POLL([RECVSOCKETS[SOCKET].fileno()],[],[],0)[0]!=[]:
+        while POLL([RECVSOCKETS[SOCKET].fileno()],[],[],0)[0]!=[]:
             try:
                 packet_length=0
                 packet,REMOTE=RECVSOCKETS[SOCKET].recvfrom(65536)
