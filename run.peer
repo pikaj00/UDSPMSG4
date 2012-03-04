@@ -1,2 +1,4 @@
 #!/bin/sh -e
-exec tcpclient -H -R -l `cat peer` `cat peer` 15783 ./client2server python hub.py `cat env/hubsocketsdir` `cat env/cachesocketsdir`
+PEER=`cat peer`
+cd /service/udpmsg4.hub
+exec tcpclient -H -R -l $PEER $PEER 15783 ./client2server python hub.py `cat env/hubsocketsdir` `cat env/cachesocketsdir`

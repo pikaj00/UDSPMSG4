@@ -19,9 +19,9 @@ def unframe(UDPMSG4):
 
         while UDPMSG4!='':
             KEY=UDPMSG4[1:ord(UDPMSG4[:1:])+1:]
-            len_KEY=len(KEY)
-            VALUE=UDPMSG4[len_KEY+3:len_KEY+(ord(UDPMSG4[len_KEY+1:len_KEY+2:])*256)+ord(UDPMSG4[len_KEY+2:len_KEY+3:])+3:]
+            KEY_LENGTH=len(KEY)
+            VALUE=UDPMSG4[KEY_LENGTH+3:KEY_LENGTH+(ord(UDPMSG4[KEY_LENGTH+1:KEY_LENGTH+2:])*256)+ord(UDPMSG4[KEY_LENGTH+2:KEY_LENGTH+3:])+3:]
             KVP[KEY]=VALUE
-            UDPMSG4=UDPMSG4[len_KEY+1+len(VALUE)+2::]
+            UDPMSG4=UDPMSG4[KEY_LENGTH+1+len(VALUE)+2::]
         return KVP
     except:    return 0
