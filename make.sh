@@ -18,7 +18,7 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
     read -p "[Enter] /path/to/ucspi-client2server: " client2server
     [[ "$client2server" == '' ]] && client2server=`cat env/client2server`
 
-    echo "[Default] `cat env/hubsockets`"
+    echo "[Default] `cat env/hubsocketsdir`"
     read -p "[Enter] /path/to/hub/sockets/directory: " hubsocketsdir
     [[ "$hubsocketsdir" == '' ]] && hubsocketsdir=`cat env/hubsocketsdir`
 
