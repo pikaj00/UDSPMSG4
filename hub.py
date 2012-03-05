@@ -256,4 +256,24 @@ while 1:
     else:
         REMOTE_QUEUE='[]'
 
+    while len(CLIENT_QUEUE)!=0:
+        write_length=0
+        packet=CLIENT_QUEUE[0]
+        packet_length=len(packet)
+        while packet_length!=write_length:
+            try:
+                write_length=os.write(1,packet[write_length::])
+            except:
+                break
+        if packet_length==write_length:
+            CLIENT_QUEUE.popleft()
+            os.write(2,'hub.py: '+CLIENT+' successful write to client\n')
+        elif write_length>0:
+            CLIENT_QUEUE[0]=[packet[write_length::]]
+            os.write(2,'hub.py: '+CLIENT+' could not write complete packet to client\n')
+            break
+        elif write_length==0:
+            os.write(2,'hub.py: '+CLIENT+' failed to write to client\n')
+            break
+
     LOOP_TIME=time()-TIME

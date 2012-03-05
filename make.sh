@@ -70,7 +70,6 @@ if [[ "${qna//y/Y}" == *Y* ]]; then
         cp run.peer /service/udpmsg4.$this_peer/run
         [ -L /service/udpmsg4.$this_peer/env ] || ( cd / ; ln -s $this_dir/env /service/udpmsg4.$this_peer )
         [ -L /service/udpmsg4.$this_peer/$this_peer ] || ( cd / ; ln -s $this_dir/peers/$this_peer /service/udpmsg4.$this_peer/peer )
-        [ -L /service/udpmsg4.$this_peer/ucspi-client2server ] || ( cd / ; ln -s $client2server /service/udpmsg4.$this_peer/client2server )
         chmod +x /service/udpmsg4.$this_peer/run
     done
 fi
